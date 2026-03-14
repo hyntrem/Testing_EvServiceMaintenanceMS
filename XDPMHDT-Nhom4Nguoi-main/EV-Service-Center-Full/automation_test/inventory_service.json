@@ -1,0 +1,105 @@
+{
+  "info": {
+    "_postman_id": "1ddd1914-4012-46b5-ba49-e57c8d1c4d34",
+    "name": "EV_Platform_Automation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53173165",
+    "_collection_link": "https://go.postman.co/collection/53173165-1ddd1914-4012-46b5-ba49-e57c8d1c4d34?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Inventory_Service",
+      "item": [
+        {
+          "name": "GET Inventory Item",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "POST Inventory Item",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Brake Pad\",\r\n  \"part_number\": \"BP-001\",\r\n  \"price\": 50\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url_base}}/api/inventory/items",
+              "host": [
+                "{{url_base}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Inventory Item",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Brake Pad Updated\",\r\n  \"part_number\": \"BP-001\",\r\n  \"price\": 60\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url_base}}/api/inventory/items/4",
+              "host": [
+                "{{url_base}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Inventory",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Brake Pad\",\r\n  \"part_number\": \"BP-001\",\r\n  \"price\": 50\r\n}"
+            },
+            "url": {
+              "raw": "{{url_base}}/api/inventory/items/6",
+              "host": [
+                "{{url_base}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "6"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
