@@ -1,0 +1,32 @@
+$kind: http-request
+name: Update Maintenance Task Status (PUT /api/maintenance/{id})
+description: Cập nhật trạng thái công việc bảo trì.
+url: "{{base_url}}/api/maintenance/tasks/{{task_id}}/status"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{jwt_user}}
+pathVariables:
+  - key: task_id
+    value: "1"
+    description: ID task bảo trì cần cập nhật
+body:
+  type: text
+  content: |-
+    {
+      "status": "in_progress"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Task status updated", function () {
+          var json = pm.response.json();
+          pm.expect(json).to.have.property('task');
+          pm.expect(json.task.status).to.eql('in_progress');
+      });
+    language: text/javascript
+order: 3000

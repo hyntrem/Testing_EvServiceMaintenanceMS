@@ -1,0 +1,28 @@
+$kind: http-request
+description: Admin tạo công việc bảo trì mới từ booking.
+url: "{{base_url}}/api/maintenance/tasks"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{jwt_admin}}
+body:
+  type: text
+  content: |-
+    {
+      "booking_id": 1,
+      "technician_id": 2
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has task object", function () {
+          var json = pm.response.json();
+          pm.expect(json).to.have.property('task');
+          pm.expect(json.task).to.have.property('id');
+      });
+    language: text/javascript
+order: 1000

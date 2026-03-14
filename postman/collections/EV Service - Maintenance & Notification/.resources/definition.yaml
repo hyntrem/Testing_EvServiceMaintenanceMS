@@ -1,0 +1,7 @@
+$kind: collection
+description: Collection cho maintenance-service và notification-service
+variables:
+  base_url: http://localhost
+  jwt_admin: ""
+  jwt_user: ""
+  internal_token: ""
