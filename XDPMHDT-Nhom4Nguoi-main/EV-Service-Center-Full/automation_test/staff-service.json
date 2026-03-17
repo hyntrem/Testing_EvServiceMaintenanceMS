@@ -1,0 +1,301 @@
+{
+  "info": {
+    "_postman_id": "f1206c9a-8927-481a-b139-58c27525ea8d",
+    "name": "EV Service Center API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51101044"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email_username\": \"admin1\",\r\n  \"password\": \"12345\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "item": []
+    },
+    {
+      "name": "Inventory",
+      "item": []
+    },
+    {
+      "name": "Maintenance",
+      "item": []
+    },
+    {
+      "name": "Payment",
+      "item": []
+    },
+    {
+      "name": "Auth",
+      "item": []
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "GetAllStaff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3MzQwOTQ3NSwianRpIjoiZGRkNDY3N2QtZDNlZS00MWRjLThjNTItMjc1MzQ1MTdiZjZhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzM0MDk0NzUsImNzcmYiOiIxNGUzODkxMS0wN2U5LTQ1MzItYjk2ZS0wYzc3NmFlZDE4OWUiLCJleHAiOjE3NzQwMTQyNzUsInJvbGUiOiJhZG1pbiJ9.6FVXJSOTW2N6GoplKXoiZ3S_SPQ6N6cy539XzlaX0Vw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{staff}}/api/staff",
+              "host": [
+                "{{staff}}"
+              ],
+              "path": [
+                "api",
+                "staff"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetById",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3MzQwOTQ3NSwianRpIjoiZGRkNDY3N2QtZDNlZS00MWRjLThjNTItMjc1MzQ1MTdiZjZhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzM0MDk0NzUsImNzcmYiOiIxNGUzODkxMS0wN2U5LTQ1MzItYjk2ZS0wYzc3NmFlZDE4OWUiLCJleHAiOjE3NzQwMTQyNzUsInJvbGUiOiJhZG1pbiJ9.6FVXJSOTW2N6GoplKXoiZ3S_SPQ6N6cy539XzlaX0Vw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{staff}}/api/staff/1",
+              "host": [
+                "{{staff}}"
+              ],
+              "path": [
+                "api",
+                "staff",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CreateStaff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3MzQwOTQ3NSwianRpIjoiZGRkNDY3N2QtZDNlZS00MWRjLThjNTItMjc1MzQ1MTdiZjZhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzM0MDk0NzUsImNzcmYiOiIxNGUzODkxMS0wN2U5LTQ1MzItYjk2ZS0wYzc3NmFlZDE4OWUiLCJleHAiOjE3NzQwMTQyNzUsInJvbGUiOiJhZG1pbiJ9.6FVXJSOTW2N6GoplKXoiZ3S_SPQ6N6cy539XzlaX0Vw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"staff1\",\r\n  \"email\": \"staff1@gmail.com\",\r\n  \"full_name\": \"Tran Van B\",\r\n  \"role\": \"technician\",\r\n  \"phone\": \"0912345678\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{staff}}/api/staff",
+              "host": [
+                "{{staff}}"
+              ],
+              "path": [
+                "api",
+                "staff"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateStaff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3MzQwOTQ3NSwianRpIjoiZGRkNDY3N2QtZDNlZS00MWRjLThjNTItMjc1MzQ1MTdiZjZhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzM0MDk0NzUsImNzcmYiOiIxNGUzODkxMS0wN2U5LTQ1MzItYjk2ZS0wYzc3NmFlZDE4OWUiLCJleHAiOjE3NzQwMTQyNzUsInJvbGUiOiJhZG1pbiJ9.6FVXJSOTW2N6GoplKXoiZ3S_SPQ6N6cy539XzlaX0Vw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"department\": \"Repair Department\",\r\n    \"status\": \"active\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{staff}}/api/staff/1",
+              "host": [
+                "{{staff}}"
+              ],
+              "path": [
+                "api",
+                "staff",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteStaff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3MzQwOTQ3NSwianRpIjoiZGRkNDY3N2QtZDNlZS00MWRjLThjNTItMjc1MzQ1MTdiZjZhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzM0MDk0NzUsImNzcmYiOiIxNGUzODkxMS0wN2U5LTQ1MzItYjk2ZS0wYzc3NmFlZDE4OWUiLCJleHAiOjE3NzQwMTQyNzUsInJvbGUiOiJhZG1pbiJ9.6FVXJSOTW2N6GoplKXoiZ3S_SPQ6N6cy539XzlaX0Vw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"department\": \"Repair Department\",\r\n    \"status\": \"active\"\r\n}"
+            },
+            "url": {
+              "raw": "{{staff}}/api/staff/1",
+              "host": [
+                "{{staff}}"
+              ],
+              "path": [
+                "api",
+                "staff",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": []
+    },
+    {
+      "name": "Reports",
+      "item": []
+    }
+  ]
+}
