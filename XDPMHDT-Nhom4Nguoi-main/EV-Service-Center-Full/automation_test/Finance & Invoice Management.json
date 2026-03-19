@@ -1,0 +1,352 @@
+{
+  "info": {
+    "_postman_id": "6b3e20fa-1841-4ae6-8ded-b949920dc876",
+    "name": "Finance & Invoice Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49736195",
+    "_collection_link": "https://go.postman.co/collection/49736195-6b3e20fa-1841-4ae6-8ded-b949920dc876?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Admin - Create Invoice",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Create invoice status code\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([201, 400, 409, 401, 403]);\r",
+              "});\r",
+              "\r",
+              "if (pm.response.code === 201) {\r",
+              "    const jsonData = pm.response.json();\r",
+              "\r",
+              "    pm.test(\"Có message thành công\", function () {\r",
+              "        pm.expect(jsonData.message).to.include(\"Hóa đơn được tạo\");\r",
+              "    });\r",
+              "\r",
+              "    pm.test(\"Có invoice object\", function () {\r",
+              "        pm.expect(jsonData.invoice).to.be.an(\"object\");\r",
+              "        pm.expect(jsonData.invoice.id).to.exist;\r",
+              "        pm.expect(jsonData.invoice.booking_id).to.exist;\r",
+              "        pm.expect(jsonData.invoice.items).to.be.an(\"array\");\r",
+              "    });\r",
+              "\r",
+              "    pm.environment.set(\"invoice_id\", jsonData.invoice.id);\r",
+              "    pm.environment.set(\"created_invoice_status\", jsonData.invoice.status);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_admin}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"booking_id\": {{booking_id}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/invoices/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Get All Invoices",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response là array\", function () {\r",
+              "    pm.expect(data).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "if (data.length > 0) {\r",
+              "    pm.environment.set(\"invoice_id\", data[0].id);\r",
+              "\r",
+              "    pm.test(\"Invoice có field cơ bản\", function () {\r",
+              "        pm.expect(data[0]).to.have.property(\"id\");\r",
+              "        pm.expect(data[0]).to.have.property(\"booking_id\");\r",
+              "        pm.expect(data[0]).to.have.property(\"user_id\");\r",
+              "        pm.expect(data[0]).to.have.property(\"status\");\r",
+              "        pm.expect(data[0]).to.have.property(\"total_amount\");\r",
+              "    });\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/invoices/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User - Get My Invoices",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response là array\", function () {\r",
+              "    pm.expect(data).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "if (data.length > 0) {\r",
+              "    pm.environment.set(\"invoice_id\", data[0].id);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/invoices/my",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "my"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Invoice Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code hợp lệ\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "if (pm.response.code === 200) {\r",
+              "    pm.test(\"Có thông tin invoice detail\", function () {\r",
+              "        pm.expect(jsonData.id).to.exist;\r",
+              "        pm.expect(jsonData.booking_id).to.exist;\r",
+              "        pm.expect(jsonData.user_id).to.exist;\r",
+              "        pm.expect(jsonData.total_amount).to.exist;\r",
+              "        pm.expect(jsonData.status).to.exist;\r",
+              "        pm.expect(jsonData.items).to.be.an(\"array\");\r",
+              "    });\r",
+              "\r",
+              "    pm.environment.set(\"invoice_id\", jsonData.id);\r",
+              "\r",
+              "    if (jsonData.status) {\r",
+              "        pm.environment.set(\"current_invoice_status\", jsonData.status);\r",
+              "    }\r",
+              "} else {\r",
+              "    console.log(\"Get Invoice Detail failed:\", jsonData);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_user}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/invoices/{{invoice_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "{{invoice_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Update Invoice Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code hợp lệ\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 403, 404]);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "if (pm.response.code === 200) {\r",
+              "    pm.test(\"Update status thành công\", function () {\r",
+              "        pm.expect(jsonData).to.have.property(\"invoice\");\r",
+              "        pm.expect(jsonData.invoice).to.have.property(\"id\");\r",
+              "        pm.expect(jsonData.invoice).to.have.property(\"status\");\r",
+              "    });\r",
+              "\r",
+              "    pm.environment.set(\"current_invoice_status\", jsonData.invoice.status);\r",
+              "\r",
+              "    pm.test(\"Status đã được cập nhật đúng\", function () {\r",
+              "        pm.expect(jsonData.invoice.status).to.eql(pm.environment.get(\"expected_status\"));\r",
+              "    });\r",
+              "} else {\r",
+              "    console.log(\"Update Invoice Status failed:\", jsonData);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"status\": \"paid\"\r\n}\r\n\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/invoices/{{invoice_id}}/status",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "{{invoice_id}}",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

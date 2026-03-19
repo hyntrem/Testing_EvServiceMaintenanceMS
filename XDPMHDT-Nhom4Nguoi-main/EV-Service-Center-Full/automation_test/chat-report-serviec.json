@@ -1,10 +1,18 @@
 {
   "info": {
+<<<<<<< HEAD
     "_postman_id": "505bc027-7fbf-45db-a8fb-249d5aa647e4",
     "name": "Service_test",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53058511",
     "_collection_link": "https://go.postman.co/collection/53058511-505bc027-7fbf-45db-a8fb-249d5aa647e4?source=collection_link"
+=======
+    "_postman_id": "51f3d077-72d1-4a59-8cb2-3454315aeebe",
+    "name": "Service_test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53058511",
+    "_collection_link": "https://go.postman.co/collection/53058511-51f3d077-72d1-4a59-8cb2-3454315aeebe?source=collection_link"
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
   },
   "item": [
     {
@@ -17,7 +25,11 @@
             "header": [],
             "body": {
               "mode": "raw",
+<<<<<<< HEAD
               "raw": "{\r\n    \"user_id\": \"2\",\r\n    \"user_name\": \"LQM\"\r\n}",
+=======
+              "raw": "{\r\n    \"user_id\": \"1\",\r\n    \"user_name\": \"QM\"\r\n}",
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
               "options": {
                 "raw": {
                   "language": "json"
@@ -332,6 +344,7 @@
       "name": "Report_service",
       "item": [
         {
+<<<<<<< HEAD
           "name": "Get token",
           "event": [
             {
@@ -348,12 +361,19 @@
               }
             }
           ],
+=======
+          "name": "TOKEN",
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
+<<<<<<< HEAD
               "raw": "{\r\n  \"email_username\": \"kyu764904@gmail.com\",\r\n  \"password\": \"12345\"\r\n}",
+=======
+              "raw": "{\r\n  \"email_username\": \"quangmy123@gmail.com\",\r\n  \"password\": \"123\"\r\n}",
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
               "options": {
                 "raw": {
                   "language": "json"
@@ -361,9 +381,16 @@
               }
             },
             "url": {
+<<<<<<< HEAD
               "raw": "{{url}}/api/login",
               "host": [
                 "{{url}}"
+=======
+              "raw": "http://localhost/api/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
               ],
               "path": [
                 "api",
@@ -375,6 +402,7 @@
         },
         {
           "name": "Báo cáo doanh thu",
+<<<<<<< HEAD
           "event": [
             {
               "listen": "test",
@@ -388,6 +416,8 @@
               }
             }
           ],
+=======
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -397,7 +427,11 @@
               "bearer": [
                 {
                   "key": "token",
+<<<<<<< HEAD
                   "value": "{{access_token}}",
+=======
+                  "value": "{{vault:authorization-secret}}",
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
                   "type": "string"
                 }
               ]
@@ -437,22 +471,30 @@
         },
         {
           "name": "Báo cáo kho",
+<<<<<<< HEAD
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
+=======
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
+<<<<<<< HEAD
                   "value": "{{access_token}}",
+=======
+                  "value": "{{vault:authorization-secret}}",
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
                   "type": "string"
                 }
               ]
             },
             "method": "GET",
             "header": [],
+<<<<<<< HEAD
             "body": {
               "mode": "raw",
               "raw": "",
@@ -462,6 +504,8 @@
                 }
               }
             },
+=======
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
             "url": {
               "raw": "{{baseUrl}}{{url_prefix}}/inventory",
               "host": [
@@ -476,6 +520,7 @@
         },
         {
           "name": "Dashboard",
+<<<<<<< HEAD
           "event": [
             {
               "listen": "prerequest",
@@ -503,19 +548,26 @@
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
+=======
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
+<<<<<<< HEAD
                   "value": "{{access_token}}",
+=======
+                  "value": "{{vault:authorization-secret}}",
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
                   "type": "string"
                 }
               ]
             },
             "method": "GET",
             "header": [],
+<<<<<<< HEAD
             "body": {
               "mode": "raw",
               "raw": "",
@@ -525,6 +577,8 @@
                 }
               }
             },
+=======
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
             "url": {
               "raw": "{{baseUrl}}{{url_prefix}}/dashboard",
               "host": [
