@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "51f3d077-72d1-4a59-8cb2-3454315aeebe",
+    "_postman_id": "505bc027-7fbf-45db-a8fb-249d5aa647e4",
     "name": "Service_test",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53058511",
-    "_collection_link": "https://go.postman.co/collection/53058511-51f3d077-72d1-4a59-8cb2-3454315aeebe?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/53058511-505bc027-7fbf-45db-a8fb-249d5aa647e4?source=collection_link"
   },
   "item": [
     {
@@ -17,7 +17,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"user_id\": \"1\",\r\n    \"user_name\": \"QM\"\r\n}",
+              "raw": "{\r\n    \"user_id\": \"2\",\r\n    \"user_name\": \"LQM\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -332,13 +332,28 @@
       "name": "Report_service",
       "item": [
         {
-          "name": "TOKEN",
+          "name": "Get token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.environment.set(\"access_token\", jsonData.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email_username\": \"quangmy123@gmail.com\",\r\n  \"password\": \"123\"\r\n}",
+              "raw": "{\r\n  \"email_username\": \"kyu764904@gmail.com\",\r\n  \"password\": \"12345\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -346,10 +361,9 @@
               }
             },
             "url": {
-              "raw": "http://localhost/api/login",
-              "protocol": "http",
+              "raw": "{{url}}/api/login",
               "host": [
-                "localhost"
+                "{{url}}"
               ],
               "path": [
                 "api",
@@ -361,6 +375,19 @@
         },
         {
           "name": "Báo cáo doanh thu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -370,7 +397,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{vault:authorization-secret}}",
+                  "value": "{{access_token}}",
                   "type": "string"
                 }
               ]
@@ -410,19 +437,31 @@
         },
         {
           "name": "Báo cáo kho",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{vault:authorization-secret}}",
+                  "value": "{{access_token}}",
                   "type": "string"
                 }
               ]
             },
             "method": "GET",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}{{url_prefix}}/inventory",
               "host": [
@@ -437,19 +476,55 @@
         },
         {
           "name": "Dashboard",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{vault:authorization-secret}}",
+                  "value": "{{access_token}}",
                   "type": "string"
                 }
               ]
             },
             "method": "GET",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}{{url_prefix}}/dashboard",
               "host": [

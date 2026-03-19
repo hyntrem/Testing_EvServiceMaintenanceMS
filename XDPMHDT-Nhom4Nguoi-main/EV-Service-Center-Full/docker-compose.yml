@@ -160,8 +160,13 @@ services:
       - REDIS_URL=redis://${REDIS_HOST}:6379
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+<<<<<<< HEAD
+    expose:
+      - "5000"
+=======
     ports:
       - "5000:5000"
+>>>>>>> a3f8c4af84664b10267c088a1b0b9d8cd1df78b5
     depends_on:
       db-user:
         condition: service_healthy
