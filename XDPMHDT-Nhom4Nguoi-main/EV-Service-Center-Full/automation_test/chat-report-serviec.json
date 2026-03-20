@@ -12,12 +12,44 @@
       "item": [
         {
           "name": "create rooms",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Parse JSON response",
+                  "let response = pm.response.json();",
+                  "",
+                  "// Kiểm tra xem trường room có tồn tại không",
+                  "pm.test(\"Response has 'room'\", function () {",
+                  "    pm.expect(response).to.have.property(\"room\");",
+                  "});",
+                  "",
+                  "// Kiểm tra user_id và user_name có tồn tại trong room",
+                  "pm.test(\"Room has user_id\", function () {",
+                  "    pm.expect(response.room).to.have.property(\"user_id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Room has user_name\", function () {",
+                  "    pm.expect(response.room).to.have.property(\"user_name\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"user_id\": \"2\",\r\n    \"user_name\": \"LQM\"\r\n}",
+              "raw": "{\r\n    \"user_id\": \"9\",\r\n    \"user_name\": \"Lqm\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -38,6 +70,21 @@
         },
         {
           "name": "check health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -67,6 +114,42 @@
         },
         {
           "name": "get_user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// Lấy dữ liệu JSON trả về\r",
+                  "let response = pm.response.json();\r",
+                  "\r",
+                  "// Kiểm tra response có 'rooms' và là mảng\r",
+                  "pm.test(\"Response has 'rooms' array\", function() {\r",
+                  "    pm.expect(response).to.have.property(\"rooms\");\r",
+                  "    pm.expect(response.rooms).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra mỗi room có user_id và user_name\r",
+                  "response.rooms.forEach((room, index) => {\r",
+                  "    pm.test(`Room ${index} has user_id`, function() {\r",
+                  "        pm.expect(room).to.have.property(\"user_id\");\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(`Room ${index} has user_name`, function() {\r",
+                  "        pm.expect(room).to.have.property(\"user_name\");\r",
+                  "    });\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -93,6 +176,30 @@
         },
         {
           "name": "waiting room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"All rooms have status 'waiting'\", function () {\r",
+                  "    // Lặp qua mảng rooms\r",
+                  "    jsonData.rooms.forEach(function(room, index) {\r",
+                  "        pm.expect(room).to.have.property(\"status\");\r",
+                  "        pm.expect(room.status).to.eql(\"waiting\", \"Room index \" + index + \" has wrong status: \" + room.status);\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -123,6 +230,25 @@
         },
         {
           "name": "active room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "pm.test(\"At least one active room exists\", function () {\r",
+                  "    pm.expect(jsonData.rooms.length, \"No active rooms found\").to.be.above(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -153,6 +279,38 @@
         },
         {
           "name": "get close",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Parse response JSON\r",
+                  "let response = pm.response.json();\r",
+                  "\r",
+                  "// Kiểm tra response thành công\r",
+                  "pm.test(\"Response thành công\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra có rooms trả về\r",
+                  "pm.test(\"Có ít nhất 1 room\", function () {\r",
+                  "    pm.expect(response.rooms.length).to.be.greaterThan(0);\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra tất cả room có status = closed\r",
+                  "pm.test(\"Tất cả room đều closed\", function () {\r",
+                  "    response.rooms.forEach(room => {\r",
+                  "        pm.expect(room.status).to.eql(\"closed\");\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -183,6 +341,44 @@
         },
         {
           "name": "room details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Parse JSON response\r",
+                  "let response = pm.response.json();\r",
+                  "\r",
+                  "// Kiểm tra request thành công\r",
+                  "pm.test(\"Response thành công\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "    pm.expect(response.success).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra có room trả về\r",
+                  "pm.test(\"Room detail tồn tại\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"room\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra room đã đóng\r",
+                  "pm.test(\"Room status là closed\", function () {\r",
+                  "    pm.expect(response.room.status).to.eql(\"closed\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra thông tin cơ bản của room\r",
+                  "pm.test(\"Room có các trường cần thiết\", function () {\r",
+                  "    const fields = [\"id\", \"subject\", \"support_role\", \"support_user_name\", \"user_name\"];\r",
+                  "    fields.forEach(field => {\r",
+                  "        pm.expect(response.room).to.have.property(field);\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -213,6 +409,37 @@
         },
         {
           "name": "messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has messages array\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"messages\");\r",
+                  "    pm.expect(jsonData.messages).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Each message has required fields\", function () {\r",
+                  "    const messages = pm.response.json().messages;\r",
+                  "    messages.forEach(msg => {\r",
+                  "        pm.expect(msg).to.have.property(\"id\");\r",
+                  "        pm.expect(msg).to.have.property(\"message\");\r",
+                  "        pm.expect(msg).to.have.property(\"created_at\");\r",
+                  "        pm.expect(msg).to.have.property(\"sender_name\");\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
@@ -244,6 +471,39 @@
         },
         {
           "name": "admin support",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Room is active\", function () {\r",
+                  "    pm.expect(jsonData.room.status).to.eql(\"active\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Admin is support user\", function () {\r",
+                  "    pm.expect(jsonData.room.support_user_name).to.eql(\"Admin\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"User is correct\", function () {\r",
+                  "    pm.expect(jsonData.room.user_name).to.eql(\"LQM\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Unread messages exist\", function () {\r",
+                  "    pm.expect(jsonData.room.unread_count).to.be.above(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [],
@@ -272,6 +532,35 @@
         },
         {
           "name": "closes room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Room status is closed\", function () {\r",
+                  "    pm.expect(jsonData.room.status).to.eql(\"closed\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Room closed_at exists\", function () {\r",
+                  "    pm.expect(jsonData.room.closed_at).to.not.be.null;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Unread count preserved\", function () {\r",
+                  "    pm.expect(jsonData.room.unread_count).to.be.above(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [],
@@ -300,6 +589,27 @@
         },
         {
           "name": "read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Mark room as read success\", function () {\r",
+                  "    pm.expect(jsonData.success).to.be.true;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
             "header": [],
@@ -338,9 +648,17 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const jsonData = pm.response.json();\r",
+                  "let JsonData = pm.response.json();\r",
+                  "pm.environment.set(\"access_token\",JsonData.access_token);\r",
                   "\r",
-                  "pm.environment.set(\"access_token\", jsonData.access_token);"
+                  "pm.test(\"Status code is 200\",function(){\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Response has access_token\",function(){\r",
+                  "    pm.expect(JsonData).to.have.property(\"access_token\");\r",
+                  "    })\r",
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -478,10 +796,45 @@
           "name": "Dashboard",
           "event": [
             {
-              "listen": "prerequest",
+              "listen": "test",
               "script": {
                 "exec": [
-                  ""
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// Parse response JSON\r",
+                  "let response = pm.response.json();\r",
+                  "\r",
+                  "// Kiểm tra bookings\r",
+                  "pm.test(\"Bookings exist\", function () {\r",
+                  "    pm.expect(response.bookings).to.be.an(\"object\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Bookings total is number\", function () {\r",
+                  "    pm.expect(response.bookings.total).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra inventory\r",
+                  "pm.test(\"Inventory exist\", function () {\r",
+                  "    pm.expect(response.inventory).to.be.an(\"object\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"No out of stock items\", function () {\r",
+                  "    pm.expect(response.inventory.out_of_stock_count).to.equal(0);\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra revenue\r",
+                  "pm.test(\"Revenue today exists\", function () {\r",
+                  "    pm.expect(response.revenue.today).to.have.property(\"total_revenue\");\r",
+                  "    pm.expect(response.revenue.today.total_revenue).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra timestamp hợp lệ\r",
+                  "pm.test(\"Timestamp is valid ISO string\", function () {\r",
+                  "    pm.expect(new Date(response.timestamp).toString()).not.to.equal(\"Invalid Date\");\r",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -489,7 +842,7 @@
               }
             },
             {
-              "listen": "test",
+              "listen": "prerequest",
               "script": {
                 "exec": [
                   ""
