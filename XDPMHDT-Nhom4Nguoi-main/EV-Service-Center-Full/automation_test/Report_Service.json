@@ -1,0 +1,374 @@
+{
+  "info": {
+    "_postman_id": "6c086bea-2461-4aef-b553-7cad5457943e",
+    "name": "Report_Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53058511",
+    "_collection_link": "https://go.postman.co/collection/53058511-6c086bea-2461-4aef-b553-7cad5457943e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Check Health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//check status 200\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "    });\r",
+              "\r",
+              "//check status User Service is running!\r",
+              "pm.test(\"Status message is correct\", function () {\r",
+              "    pm.expect(pm.response.json().status).to.eql(\"User Service is running!\");\r",
+              "    });\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Access Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//check status 200\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "//kiểm tra access_token\r",
+              "pm.test(\"Check access_token\",function(){\r",
+              "    pm.expect(pm.response.json().access_token).to.not.eql(null)\r",
+              "})\r",
+              "//Lấy và lưu access_token\r",
+              "let JsonData = pm.response.json();\r",
+              "pm.environment.set(\"access_token\",JsonData.access_token);\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email_username\" : \"{{email_userName}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{localUrl}}/api/login",
+          "host": [
+            "{{localUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Revenue Report",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Lấy token từ environment\r",
+              "const accessToken = pm.environment.get(\"access_token\");\r",
+              "// Thêm token vào header Authorization\r",
+              "pm.request.headers.add({\r",
+              "    key: \"Authorization\",\r",
+              "    value: `Bearer ${accessToken}`\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "const jsonData = pm.response.json();\r",
+              "pm.test(\"Response has required fields\", function () {\r",
+              "\r",
+              "    pm.expect(jsonData).to.have.property(\"total_revenue\");\r",
+              "    pm.expect(jsonData).to.have.property(\"transaction_count\");\r",
+              "    pm.expect(jsonData).to.have.property(\"avg_transaction_value\");\r",
+              "    pm.expect(jsonData).to.have.property(\"payment_methods\");\r",
+              "    pm.expect(jsonData).to.have.property(\"period\");\r",
+              "});\r",
+              "//check có data k\r",
+              "pm.test(\"Has transactions\", function () {\r",
+              "    pm.expect(jsonData.transaction_count).to.be.above(0);\r",
+              "});\r",
+              "//check có data trống k\r",
+              "pm.test(\"No data case\", function () {\r",
+              "    pm.expect(jsonData.transaction_count).to.eql(0);\r",
+              "    pm.expect(jsonData.total_revenue).to.eql(0);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is less than 1000ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}{{url_prefix}}/revenue?start_date=2024-01-01&end_date=2024-01-31",
+          "host": [
+            "{{baseUrl}}{{url_prefix}}"
+          ],
+          "path": [
+            "revenue"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "2024-01-01"
+            },
+            {
+              "key": "end_date",
+              "value": "2024-01-31"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Inventory Report",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Lấy token từ environment\r",
+              "const accessToken = pm.environment.get(\"access_token\");\r",
+              "// Thêm token vào header Authorization\r",
+              "pm.request.headers.add({\r",
+              "    key: \"Authorization\",\r",
+              "    value: `Bearer ${accessToken}`\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response has required fields\", function () {\r",
+              "    pm.expect(data).to.not.eql(null);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Has inventory data\", function () {\r",
+              "    pm.expect(data.total_parts).to.be.above(0);\r",
+              "    pm.expect(data.total_quantity).to.be.above(0);\r",
+              "    pm.expect(data.total_inventory_value).to.be.above(0);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Empty inventory case\", function () {\r",
+              "    pm.expect(data.total_parts).to.eql(0);\r",
+              "    pm.expect(data.total_quantity).to.eql(0);\r",
+              "    pm.expect(data.total_inventory_value).to.eql(0);\r",
+              "\r",
+              "    pm.expect(data.low_stock_parts).to.be.an(\"array\").that.is.empty;\r",
+              "    pm.expect(data.out_of_stock_parts).to.be.an(\"array\").that.is.empty;\r",
+              "});\r",
+              "\r",
+              "\r",
+              "pm.test(\"Inventory API response time < 1500ms\", function () {\r",
+              "    const time = pm.response.responseTime;\r",
+              "    pm.expect(time).to.be.below(1500);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}{{url_prefix}}/inventory",
+          "host": [
+            "{{baseUrl}}{{url_prefix}}"
+          ],
+          "path": [
+            "inventory"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dashboard",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Lấy token từ environment\r",
+              "const accessToken = pm.environment.get(\"access_token\");\r",
+              "// Thêm token vào header Authorization\r",
+              "pm.request.headers.add({\r",
+              "    key: \"Authorization\",\r",
+              "    value: `Bearer ${accessToken}`\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response has main sections\", function () {\r",
+              "    pm.expect(data).to.have.property(\"bookings\");\r",
+              "    pm.expect(data).to.have.property(\"inventory\");\r",
+              "    pm.expect(data).to.have.property(\"revenue\");\r",
+              "    pm.expect(data).to.have.property(\"timestamp\");\r",
+              "});\r",
+              "\r",
+              "//check có tồn tại k\r",
+              "pm.test(\"Dashboard structure is valid\", function () {\r",
+              "    pm.expect(data.bookings).to.be.an(\"object\");\r",
+              "    pm.expect(data.inventory).to.be.an(\"object\");\r",
+              "    pm.expect(data.revenue).to.be.an(\"object\");\r",
+              "});\r",
+              "//xem có dữ liệu trống k\r",
+              "pm.test(\"Empty dashboard data\", function () {\r",
+              "\r",
+              "    // Bookings\r",
+              "    pm.expect(data.bookings.total).to.eql(0);\r",
+              "    pm.expect(data.bookings.completed).to.eql(0);\r",
+              "    pm.expect(data.bookings.pending).to.eql(0);\r",
+              "    pm.expect(data.bookings.confirmed).to.eql(0);\r",
+              "\r",
+              "    // Inventory\r",
+              "    pm.expect(data.inventory.total_parts).to.eql(0);\r",
+              "    pm.expect(data.inventory.total_quantity).to.eql(0);\r",
+              "    pm.expect(data.inventory.total_inventory_value).to.eql(0);\r",
+              "\r",
+              "    // Revenue (month)\r",
+              "    pm.expect(data.revenue.month.total_revenue).to.eql(0);\r",
+              "    pm.expect(data.revenue.month.transaction_count).t\r",
+              "    pm.expect(data.revenue.today.total_revenue).to.eql(0);\r",
+              "    pm.expect(data.revenue.today.transaction_count).to.eql(0);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response time is acceptable\", function () {\r",
+              "    const time = pm.response.responseTime;\r",
+              "    pm.expect(time).to.be.below(2000); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}{{url_prefix}}/dashboard?start_date=2026-01-01&end_date=2026-12-31",
+          "host": [
+            "{{baseUrl}}{{url_prefix}}"
+          ],
+          "path": [
+            "dashboard"
+          ],
+          "query": [
+            {
+              "key": "start_date",
+              "value": "2026-01-01"
+            },
+            {
+              "key": "end_date",
+              "value": "2026-12-31"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
