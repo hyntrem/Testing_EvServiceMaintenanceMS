@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "99049059-6903-4479-a24e-84bbdff2c7bb",
+    "_postman_id": "0714bd0b-3e6b-40c2-929c-df17fbc92e70",
     "name": "Booking-service",
     "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "53166252",
-    "_collection_link": "https://go.postman.co/collection/53166252-99049059-6903-4479-a24e-84bbdff2c7bb?source=collection_link"
+    "_exporter_id": "53359712",
+    "_collection_link": "https://go.postman.co/collection/53359712-0714bd0b-3e6b-40c2-929c-df17fbc92e70?source=collection_link"
   },
   "item": [
     {
@@ -15,15 +15,22 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status 200\", function () {",
+              "let jsonData;",
+              "try {",
+              "    jsonData = pm.response.json();",
+              "} catch (e) {",
+              "    throw new Error(\"Response is not valid JSON\");",
+              "}",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});",
               "",
-              "const data = pm.response.json();",
+              "pm.test(\"Content-Type is JSON\", function () {",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
               "",
-              "pm.test(\"Response is array\", function () {",
-              "    pm.expect(data).to.be.an(\"array\");",
-              "});"
+              "console.log(\"Get Booking List response:\", jsonData);"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -37,22 +44,27 @@
           "bearer": [
             {
               "key": "token",
-              "value": "{{jwt_admin}}",
+              "value": "{{token}}",
               "type": "string"
             }
           ]
         },
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "{{base_url}}/api/bookings/items",
+          "raw": "{{base_url}}/api/bookings",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
-            "bookings",
-            "items"
+            "bookings"
           ]
         },
         "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
@@ -66,20 +78,33 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code valid\", function () {",
-              "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400, 401, 403]);",
+              "let jsonData;",
+              "try {",
+              "    jsonData = pm.response.json();",
+              "} catch (e) {",
+              "    throw new Error(\"Response is not valid JSON\");",
+              "}",
+              "",
+              "pm.test(\"Status code is 200 or 201\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
               "});",
               "",
-              "const jsonData = pm.response.json();",
+              "let bookingId =",
+              "    jsonData.id ||",
+              "    jsonData.booking_id ||",
+              "    jsonData.data?.id ||",
+              "    jsonData.data?.booking_id;",
               "",
-              "if (pm.response.code === 200 || pm.response.code === 201) {",
-              "    pm.test(\"Booking exists\", function () {",
-              "        pm.expect(jsonData.booking).to.exist;",
-              "        pm.expect(jsonData.booking.id).to.exist;",
-              "    });",
+              "if (bookingId) {",
+              "    pm.environment.set(\"booking_id\", bookingId);",
+              "}",
               "",
-              "    pm.environment.set(\"booking_id\", jsonData.booking.id);",
-              "}"
+              "pm.test(\"booking_id saved to environment\", function () {",
+              "    pm.expect(pm.environment.get(\"booking_id\")).to.exist;",
+              "});",
+              "",
+              "console.log(\"Create Booking response:\", jsonData);",
+              "console.log(\"Saved booking_id:\", pm.environment.get(\"booking_id\"));"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -93,16 +118,22 @@
           "bearer": [
             {
               "key": "token",
-              "value": "{{jwt_admin}}",
+              "value": "{{token}}",
               "type": "string"
             }
           ]
         },
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"service_type\": \"maintenance\",\n  \"technician_id\": 1,\n  \"station_id\": 1,\n  \"start_time\": \"2026-03-14T09:00:00\",\n  \"end_time\": \"2026-03-14T10:00:00\"\n}",
+          "raw": "{\n  \"user_id\": {{user_id}},\n  \"vehicle_id\": {{vehicle_id}},\n  \"technician_id\": {{technician_id}},\n  \"time\": \"{{booking_time}}\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -110,72 +141,16 @@
           }
         },
         "url": {
-          "raw": "{{base_url}}/api/bookings/items",
+          "raw": "{{base_url}}/api/bookings",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
-            "bookings",
-            "items"
+            "bookings"
           ]
         },
         "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
-      },
-      "response": []
-    },
-    {
-      "name": "Login Admin",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Login successful\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});\r",
-              "\r",
-              "const jsonData = pm.response.json();\r",
-              "\r",
-              "pm.test(\"Access token exists\", function () {\r",
-              "    pm.expect(jsonData.access_token).to.exist;\r",
-              "});\r",
-              "\r",
-              "if (jsonData.access_token) {\r",
-              "    pm.environment.set(\"jwt_admin\", jsonData.access_token);\r",
-              "}"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "noauth"
-        },
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email_username\": \"admin1\",\r\n  \"password\": \"12345\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{base_url}}/api/login",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "login"
-          ]
-        }
       },
       "response": []
     },
@@ -186,17 +161,18 @@
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code valid\", function () {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 403, 404]);\r",
+              "let jsonData;\r",
+              "try {\r",
+              "    jsonData = pm.response.json();\r",
+              "} catch (e) {\r",
+              "    throw new Error(\"Response is not valid JSON\");\r",
+              "}\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
               "});\r",
               "\r",
-              "const jsonData = pm.response.json();\r",
-              "\r",
-              "if (pm.response.code === 200) {\r",
-              "    pm.test(\"Booking id matches\", function () {\r",
-              "        pm.expect(jsonData.id).to.eql(Number(pm.environment.get(\"booking_id\")));\r",
-              "    });\r",
-              "}"
+              "console.log(\"Get Booking By ID response:\", jsonData);"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -210,22 +186,27 @@
           "bearer": [
             {
               "key": "token",
-              "value": "{{jwt_admin}}",
+              "value": "{{token}}",
               "type": "string"
             }
           ]
         },
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "{{base_url}}/api/bookings/items/{{booking_id}}",
+          "raw": "{{base_url}}/api/bookings/{{booking_id}}",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
             "bookings",
-            "items",
             "{{booking_id}}"
           ]
         }
@@ -233,15 +214,17 @@
       "response": []
     },
     {
-      "name": "Cancel Booking",
+      "name": "Delete Booking",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code valid\", function () {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 401, 403, 404]);\r",
-              "});"
+              "pm.test(\"Status code is 200 or 204\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+              "});\r",
+              "\r",
+              "console.log(\"Delete Booking status:\", pm.response.code);"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -255,7 +238,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "{{jwt_admin}}",
+              "value": "{{token}}",
               "type": "string"
             }
           ]
@@ -263,14 +246,140 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "{{base_url}}/api/bookings/items/{{booking_id}}",
+          "raw": "{{base_url}}/api/bookings/{{booking_id}}",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
             "bookings",
-            "items",
+            "{{booking_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get My Bookings",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let jsonData;\r",
+              "try {\r",
+              "    jsonData = pm.response.json();\r",
+              "} catch (e) {\r",
+              "    throw new Error(\"Response is not valid JSON\");\r",
+              "}\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "console.log(\"Get My Bookings response:\", jsonData);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/bookings/my-bookings",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "bookings",
+            "my-bookings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Booking",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let jsonData;\r",
+              "try {\r",
+              "    jsonData = pm.response.json();\r",
+              "} catch (e) {\r",
+              "    throw new Error(\"Response is not valid JSON\");\r",
+              "}\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "console.log(\"Update Booking response:\", jsonData);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"user_id\": {{user_id}},\r\n  \"vehicle_id\": {{vehicle_id}},\r\n  \"technician_id\": {{technician_id}},\r\n  \"time\": \"{{updated_booking_time}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/bookings/{{booking_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "bookings",
             "{{booking_id}}"
           ]
         }
