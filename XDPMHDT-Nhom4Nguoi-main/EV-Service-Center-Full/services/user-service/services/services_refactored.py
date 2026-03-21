@@ -257,3 +257,27 @@ class ProfileService:
     def get_all_admins():
         """Lấy tất cả admin users"""
         return User.query.filter_by(role="admin").all()
+
+
+    @staticmethod
+    def create_profile(user_id, data):
+        try:
+            profile = Profile(
+                user_id=user_id,
+                full_name=data.get("full_name"),
+                phone_number=data.get("phone_number"),
+                address=data.get("address"),
+                bio=data.get("bio"),
+                avatar_url=data.get("avatar_url"),
+                vehicle_model=data.get("vehicle_model"),
+                vin_number=data.get("vin_number")
+            )
+
+            db.session.add(profile)
+            db.session.commit()
+
+            return profile, None
+
+        except Exception as e:
+            db.session.rollback()
+            return None, str(e)
