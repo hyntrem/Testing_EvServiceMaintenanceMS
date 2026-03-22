@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required
 from app import db
 from models.staff_model import StaffShift, Staff
 from datetime import datetime, date, time as dt_time
-
+from datetime import datetime, timedelta
 shift_bp = Blueprint("shifts", __name__, url_prefix="/api/shifts")
 
 
@@ -177,30 +177,127 @@ def check_out_shift(shift_id):
 @shift_bp.route("/schedule", methods=["POST"])
 @jwt_required()
 def bulk_schedule_shifts():
-    """
-    Tạo lịch làm việc hàng loạt
-
-    Body:
-    {
-        "staff_id": 1,
-        "start_date": "2025-12-01",
-        "end_date": "2025-12-07",
-        "shifts": [
-            {"day_of_week": 1, "shift_type": "morning", "start_time": "08:00", "end_time": "12:00"},
-            {"day_of_week": 2, "shift_type": "afternoon", "start_time": "13:00", "end_time": "17:00"}
-        ]
-    }
-    """
     try:
         data = request.get_json()
 
-        # TODO: Implement bulk shift scheduling logic
+        # =============================
+        # 1. VALIDATE
+        # =============================
+        required = ["staff_id", "start_date", "end_date", "shifts"]
+        if not all(field in data for field in required):
+            return jsonify({"success": False, "error": "Missing required fields"}), 400
 
+        staff = Staff.query.get(data["staff_id"])
+        if not staff:
+            return jsonify({"success": False, "error": "Staff not found"}), 404
+
+        start_date = datetime.fromisoformat(data["start_date"]).date()
+        end_date = datetime.fromisoformat(data["end_date"]).date()
+
+        if start_date > end_date:
+            return jsonify({"success": False, "error": "Invalid date range"}), 400
+
+        shifts_config = data["shifts"]
+
+        created_shifts = []
+        skipped = 0
+
+        current_date = start_date
+
+        # =============================
+        # 2. LOOP QUA NGÀY
+        # =============================
+        while current_date <= end_date:
+
+            weekday = current_date.weekday()  # 0=Mon ... 6=Sun
+
+            for cfg in shifts_config:
+
+                if cfg["day_of_week"] != weekday:
+                    continue
+
+                start_time = datetime.strptime(cfg["start_time"], "%H:%M").time()
+                end_time = datetime.strptime(cfg["end_time"], "%H:%M").time()
+
+                # =============================
+                # 3. CHECK TRÙNG
+                # =============================
+                exist = StaffShift.query.filter_by(
+                    staff_id=data["staff_id"],
+                    shift_date=current_date,
+                    shift_type=cfg["shift_type"]
+                ).first()
+
+                if exist:
+                    skipped += 1
+                    continue
+
+                # =============================
+                # 4. TẠO SHIFT
+                # =============================
+                new_shift = StaffShift(
+                    staff_id=data["staff_id"],
+                    shift_date=current_date,
+                    shift_type=cfg["shift_type"],
+                    start_time=start_time,
+                    end_time=end_time,
+                    status="scheduled"
+                )
+
+                db.session.add(new_shift)
+                created_shifts.append(new_shift)
+
+            current_date += timedelta(days=1)
+
+        db.session.commit()
+
+        # =============================
+        # 5. RESPONSE CÓ DATA
+        # =============================
         return jsonify({
             "success": True,
-            "message": "Shifts scheduled successfully"
+            "message": "Shifts scheduled successfully",
+            "created_count": len(created_shifts),
+            "skipped_count": skipped,
+            "shifts": [s.to_dict() for s in created_shifts]
         }), 201
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
+
+@shift_bp.route("/<int:shift_id>", methods=["DELETE"])
+@jwt_required()
+def delete_shift(shift_id):
+    try:
+        shift = StaffShift.query.get(shift_id)
+
+        if not shift:
+            return jsonify({
+                "success": False,
+                "error": "Shift not found"
+            }), 404
+
+        # ❌ Không cho xóa nếu đang làm (optional - khuyến nghị)
+        if shift.status == "in_progress":
+            return jsonify({
+                "success": False,
+                "error": "Cannot delete shift in progress"
+            }), 400
+
+        # 👉 Soft delete
+        shift.status = "cancelled"
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Shift cancelled successfully"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500

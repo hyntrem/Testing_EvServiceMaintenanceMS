@@ -169,7 +169,6 @@ services:
         condition: service_started
     networks:
       - ev_network
-
   # ===================== INVENTORY SERVICE =====================
   inventory-service:
     build: ./services/inventory-service
