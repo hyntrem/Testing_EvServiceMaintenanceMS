@@ -1,0 +1,423 @@
+{
+  "info": {
+    "_postman_id": "6d057421-d7af-4c78-8d98-644f24124ec2",
+    "name": "Finance-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53359773",
+    "_collection_link": "https://go.postman.co/collection/53359773-6d057421-d7af-4c78-8d98-644f24124ec2?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Admin - Create Invoice",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response has invoice object\", function () {\r",
+              "    pm.expect(res).to.have.property(\"invoice\");\r",
+              "    pm.expect(res.invoice).to.be.an(\"object\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice has id\", function () {\r",
+              "    pm.expect(res.invoice).to.have.property(\"id\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice has booking_id\", function () {\r",
+              "    pm.expect(res.invoice).to.have.property(\"booking_id\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice has total_amount\", function () {\r",
+              "    pm.expect(res.invoice).to.have.property(\"total_amount\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice has status\", function () {\r",
+              "    pm.expect(res.invoice).to.have.property(\"status\");\r",
+              "});\r",
+              "\r",
+              "if (res.invoice && res.invoice.id) {\r",
+              "    pm.environment.set(\"invoice_id\", res.invoice.id);\r",
+              "}\r",
+              "\r",
+              "pm.test(\"Saved invoice_id to environment\", function () {\r",
+              "    pm.expect(pm.environment.get(\"invoice_id\")).to.exist;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_admin}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"booking_id\": {{booking_id}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_finance}}/api/invoices/",
+          "host": [
+            "{{base_url_finance}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Get All Invoices",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response is array\", function () {\r",
+              "    pm.expect(res).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "if (res.length > 0) {\r",
+              "    pm.test(\"First item has required fields\", function () {\r",
+              "        pm.expect(res[0]).to.have.property(\"id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"booking_id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"user_id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"total_amount\");\r",
+              "        pm.expect(res[0]).to.have.property(\"status\");\r",
+              "    });\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url_finance}}/api/invoices/",
+          "host": [
+            "{{base_url_finance}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User - Get My Invoices",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const data = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response là array\", function () {\r",
+              "    pm.expect(data).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "if (data.length > 0) {\r",
+              "    pm.environment.set(\"invoice_id\", data[0].id);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url_finance}}/api/invoices/my",
+          "host": [
+            "{{base_url_finance}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "my"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Update Invoice Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response contains invoice\", function () {\r",
+              "    pm.expect(res).to.have.property(\"invoice\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice status updated correctly\", function () {\r",
+              "    pm.expect(res.invoice.status).to.eql(pm.environment.get(\"invoice_status\"));\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"status\": \"{{invoice_status}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_finance}}/api/invoices/{{invoice_id}}/status",
+          "host": [
+            "{{base_url_finance}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "{{invoice_id}}",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Invoice By ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Invoice detail has id\", function () {\r",
+              "    pm.expect(res).to.have.property(\"id\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice detail has items\", function () {\r",
+              "    pm.expect(res).to.have.property(\"items\");\r",
+              "    pm.expect(res.items).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice id matches environment\", function () {\r",
+              "    pm.expect(String(res.id)).to.eql(String(pm.environment.get(\"invoice_id\")));\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice has total_amount and status\", function () {\r",
+              "    pm.expect(res).to.have.property(\"total_amount\");\r",
+              "    pm.expect(res).to.have.property(\"status\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url_finance}}/api/invoices/{{invoice_id}}",
+          "host": [
+            "{{base_url_finance}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "{{invoice_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Pay Invoice",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response has transaction\", function () {\r",
+              "    pm.expect(res).to.have.property(\"transaction\");\r",
+              "    pm.expect(res.transaction).to.be.an(\"object\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Transaction has invoice_id\", function () {\r",
+              "    pm.expect(res.transaction).to.have.property(\"invoice_id\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Transaction has status\", function () {\r",
+              "    pm.expect(res.transaction).to.have.property(\"status\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \r\n    \"method\": \"{{payment_method}}\" \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_finance}}/api/invoices/{{invoice_id}}/pay",
+          "host": [
+            "{{base_url_finance}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "{{invoice_id}}",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

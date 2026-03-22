@@ -1,0 +1,285 @@
+{
+  "info": {
+    "_postman_id": "01cfe27b-a9f5-4481-9abc-21d183c8a41c",
+    "name": "Payment-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53359773",
+    "_collection_link": "https://go.postman.co/collection/53359773-01cfe27b-a9f5-4481-9abc-21d183c8a41c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Create Payment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code hợp lệ\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([201, 400]);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "if (pm.response.code === 201) {\r",
+              "    pm.test(\"Create payment thành công\", function () {\r",
+              "        pm.expect(jsonData.id).to.exist;\r",
+              "        pm.expect(jsonData.invoice_id).to.exist;\r",
+              "        pm.expect(jsonData.user_id).to.exist;\r",
+              "        pm.expect(jsonData.amount).to.exist;\r",
+              "        pm.expect(jsonData.method).to.exist;\r",
+              "        pm.expect(jsonData.status).to.exist;\r",
+              "        pm.expect(jsonData.pg_transaction_id).to.exist;\r",
+              "        pm.expect(jsonData.payment_data).to.exist;\r",
+              "    });\r",
+              "\r",
+              "    pm.environment.set(\"payment_transaction_id\", jsonData.id);\r",
+              "    pm.environment.set(\"pg_transaction_id\", jsonData.pg_transaction_id);\r",
+              "    pm.environment.set(\"current_payment_status\", jsonData.status);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"invoice_id\": {{invoice_id}},\r\n  \"method\": \"{{payment_method}}\",\r\n  \"user_id\": {{user_id}},\r\n  \"amount\": {{payment_amount}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/create",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Webhook Payment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code hợp lệ\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+              "});\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "if (pm.response.code === 200) {\r",
+              "    pm.test(\"Webhook xử lý thành công\", function () {\r",
+              "        pm.expect(jsonData.message).to.eql(\"Webhook processed successfully\");\r",
+              "    });\r",
+              "\r",
+              "    pm.environment.set(\"current_payment_status\", \"success\");\r",
+              "} else {\r",
+              "    console.log(\"Webhook failed:\", jsonData);\r",
+              "}\r",
+              "\r",
+              "pm.environment.set(\"current_payment_status\", \"success\");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"pg_transaction_id\": \"{{pg_transaction_id}}\",\r\n  \"status\": \"success\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/webhook",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "webhook"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User - Payment History My",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response is array\", function () {\r",
+              "    pm.expect(res).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "if (res.length > 0) {\r",
+              "    pm.test(\"First payment has required fields\", function () {\r",
+              "        pm.expect(res[0]).to.have.property(\"id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"invoice_id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"user_id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"amount\");\r",
+              "        pm.expect(res[0]).to.have.property(\"method\");\r",
+              "        pm.expect(res[0]).to.have.property(\"status\");\r",
+              "        pm.expect(res[0]).to.have.property(\"pg_transaction_id\");\r",
+              "    });\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/history/my",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "history",
+            "my"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin - Payment History All",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response is array\", function () {\r",
+              "    pm.expect(res).to.be.an(\"array\");\r",
+              "});\r",
+              "\r",
+              "if (res.length > 0) {\r",
+              "    pm.test(\"First payment has required fields\", function () {\r",
+              "        pm.expect(res[0]).to.have.property(\"id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"invoice_id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"user_id\");\r",
+              "        pm.expect(res[0]).to.have.property(\"amount\");\r",
+              "        pm.expect(res[0]).to.have.property(\"method\");\r",
+              "        pm.expect(res[0]).to.have.property(\"status\");\r",
+              "    });\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/history/all",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "history",
+            "all"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
