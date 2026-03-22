@@ -119,20 +119,88 @@ class PaymentService:
         return None, None
 
     # --- Core Business Logic (Giữ nguyên logic tạo request) ---
+    # @staticmethod
+    # def create_payment_request(invoice_id, method, user_id, amount): 
+    #     """Bắt đầu tạo giao dịch thanh toán"""
+        
+    #     # Bỏ API call, chỉ kiểm tra trạng thái bên Finance
+    #     # ...
+
+    #     # 3. Tạo dữ liệu PG Mock
+    #     pg_id, payment_data = PaymentService._generate_mock_pg_data(invoice_id, amount, method)
+        
+    #     if not pg_id:
+    #          return None, "Phương thức thanh toán không hợp lệ."
+
+    #     # 4. Tạo Payment Transaction trong DB (FIX CRASH)
+    #     new_transaction = PaymentTransaction(
+    #         invoice_id=invoice_id,
+    #         user_id=user_id,
+    #         amount=amount,
+    #         method=method,
+    #         pg_transaction_id=pg_id,
+    #         payment_data_json=payment_data
+    #     )
+
+    #     try:
+    #         db.session.add(new_transaction)
+    #         db.session.commit()
+    #         return new_transaction.to_dict(), None # Trả về dictionary
+    #     except IntegrityError:
+    #         # Lỗi khi PG ID bị trùng (rất hiếm do có random hex)
+    #         db.session.rollback()
+    #         return None, "Lỗi: Đã có giao dịch đang chờ hoặc giao dịch trùng lặp."
+    #     except Exception as e:
+    #         # Bắt mọi lỗi khác và rollback, ngăn chặn worker crash
+    #         current_app.logger.error(f"CRITICAL ERROR in PaymentService.create_payment_request: {str(e)}")
+    #         db.session.rollback()
+    #         return None, "Lỗi máy chủ nghiêm trọng khi tạo giao dịch."
+            
+    # # --- History Functions (Giữ nguyên) ---
     @staticmethod
-    def create_payment_request(invoice_id, method, user_id, amount): 
+    def create_payment_request(invoice_id, method, user_id, amount):
         """Bắt đầu tạo giao dịch thanh toán"""
-        
-        # Bỏ API call, chỉ kiểm tra trạng thái bên Finance
-        # ...
 
-        # 3. Tạo dữ liệu PG Mock
+    # 1. Lấy thông tin invoice từ Finance Service
+        invoice_data, invoice_error = PaymentService._get_invoice_details(invoice_id)
+        if invoice_error or not invoice_data:
+            return None, "Invoice không tồn tại."
+
+    # 2. Kiểm tra trạng thái invoice
+        invoice_status = invoice_data.get("status")
+        if invoice_status == "paid":
+            return None, "Invoice đã được thanh toán."
+        if invoice_status == "canceled":
+            return None, "Invoice đã bị hủy."
+
+    # 3. Kiểm tra user có đúng chủ invoice không
+        invoice_user_id = invoice_data.get("user_id")
+        if str(invoice_user_id) != str(user_id):
+            return None, "User không khớp với invoice."
+
+    # 4. Kiểm tra số tiền có khớp invoice không
+        invoice_total = invoice_data.get("total_amount")
+        try:
+            if float(amount) != float(invoice_total):
+                return None, "Số tiền thanh toán không khớp với invoice."
+        except (TypeError, ValueError):
+            return None, "Dữ liệu amount không hợp lệ."
+
+    # 5. Kiểm tra có giao dịch pending trước đó chưa
+        existing_pending = PaymentTransaction.query.filter_by(
+            invoice_id=invoice_id,
+            status="pending"
+        ).first()
+
+        if existing_pending:
+            return None, "Invoice này đang có giao dịch chờ thanh toán."
+
+    # 6. Tạo dữ liệu PG Mock
         pg_id, payment_data = PaymentService._generate_mock_pg_data(invoice_id, amount, method)
-        
         if not pg_id:
-             return None, "Phương thức thanh toán không hợp lệ."
+            return None, "Phương thức thanh toán không hợp lệ."
 
-        # 4. Tạo Payment Transaction trong DB (FIX CRASH)
+    # 7. Tạo Payment Transaction trong DB
         new_transaction = PaymentTransaction(
             invoice_id=invoice_id,
             user_id=user_id,
@@ -145,18 +213,15 @@ class PaymentService:
         try:
             db.session.add(new_transaction)
             db.session.commit()
-            return new_transaction.to_dict(), None # Trả về dictionary
+            return new_transaction.to_dict(), None
         except IntegrityError:
-            # Lỗi khi PG ID bị trùng (rất hiếm do có random hex)
             db.session.rollback()
             return None, "Lỗi: Đã có giao dịch đang chờ hoặc giao dịch trùng lặp."
         except Exception as e:
-            # Bắt mọi lỗi khác và rollback, ngăn chặn worker crash
             current_app.logger.error(f"CRITICAL ERROR in PaymentService.create_payment_request: {str(e)}")
             db.session.rollback()
             return None, "Lỗi máy chủ nghiêm trọng khi tạo giao dịch."
-            
-    # --- History Functions (Giữ nguyên) ---
+
     @staticmethod
     def get_transaction_by_pg_id(pg_transaction_id):
         return PaymentTransaction.query.filter_by(pg_transaction_id=pg_transaction_id).first()
