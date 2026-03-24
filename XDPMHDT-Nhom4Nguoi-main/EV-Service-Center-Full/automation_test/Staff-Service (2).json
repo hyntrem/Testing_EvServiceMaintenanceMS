@@ -1,0 +1,2435 @@
+{
+  "info": {
+    "_postman_id": "f1206c9a-8927-481a-b139-58c27525ea8d",
+    "name": "Staff-Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51101044"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "LấyToken",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.environment.set(\"access_token\", jsonData.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email_username\": \"admin1\",\r\n  \"password\": \"12345\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "ShiftStaff",
+          "item": [
+            {
+              "name": "GetShiftList",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "//\r",
+                      "// 1. Status code\r",
+                      "//\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 2. success = true\r",
+                      "//\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": {
+                  "raw": "{{staff}}/api/shifts",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "shifts"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CreateShift",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "//\r",
+                      "// 1. Status code\r",
+                      "//\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 2. success = true\r",
+                      "//\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 3. Có message\r",
+                      "//\r",
+                      "pm.test(\"Response has message\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"message\");\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 4. Có object shift\r",
+                      "//\r",
+                      "pm.test(\"Response has shift object\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"shift\");\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 5. Validate structure của shift\r",
+                      "//\r",
+                      "let shift = jsonData.shift;\r",
+                      "\r",
+                      "pm.test(\"Shift has required fields\", function () {\r",
+                      "    pm.expect(shift).to.have.property(\"id\");\r",
+                      "    pm.expect(shift).to.have.property(\"staff_id\");\r",
+                      "    pm.expect(shift).to.have.property(\"shift_date\");\r",
+                      "    pm.expect(shift).to.have.property(\"shift_type\");\r",
+                      "    pm.expect(shift).to.have.property(\"start_time\");\r",
+                      "    pm.expect(shift).to.have.property(\"end_time\");\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 8. Lưu shift_id để dùng cho API sau\r",
+                      "//\r",
+                      "pm.test(\"Save shift_id\", function () {\r",
+                      "    pm.environment.set(\"shift_id\", shift.id);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "    {\r\n        \"staff_id\": \"7\",\r\n        \"shift_date\": \"2025-12-01\",\r\n        \"shift_type\": \"morning\",\r\n        \"start_time\": \"09:00:00\",\r\n        \"end_time\": \"12:00:00\"\r\n    }"
+                },
+                "url": {
+                  "raw": "{{staff}}/api/shifts",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "shifts"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CheckinShift",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 0. FAIL FAST (QUAN TRỌNG)\r",
+                      "// ===============================\r",
+                      "if (pm.response.code !== 200) {\r",
+                      "    console.log(\"ERROR RESPONSE:\", jsonData);\r",
+                      "\r",
+                      "    pm.test(\"Check-in should succeed\", function () {\r",
+                      "        pm.expect.fail(\"API failed with status \" + pm.response.code);\r",
+                      "    });\r",
+                      "\r",
+                      "    return;\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 1. STATUS CODE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 2. SUCCESS TRUE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 3. MESSAGE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Message is correct\", function () {\r",
+                      "    pm.expect(jsonData.message.toLowerCase())\r",
+                      "        .to.include(\"checked in\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 4. SHIFT OBJECT\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shift object exists\", function () {\r",
+                      "    pm.expect(jsonData.shift).to.be.an(\"object\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 5. CHECK STATUS UPDATED\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shift status is in_progress\", function () {\r",
+                      "    pm.expect(jsonData.shift.status).to.eql(\"in_progress\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 6. CHECK actual_start_time\r",
+                      "// ===============================\r",
+                      "pm.test(\"actual_start_time is set\", function () {\r",
+                      "    pm.expect(jsonData.shift.actual_start_time).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 7. CHECK ID MATCH\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shift ID correct\", function () {\r",
+                      "    let expectedId = pm.variables.get(\"shift_id\");\r",
+                      "    pm.expect(jsonData.shift.id.toString())\r",
+                      "        .to.eql(expectedId.toString());\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 8. SAVE DATA (OPTIONAL)\r",
+                      "// ===============================\r",
+                      "pm.environment.set(\"current_shift_status\", jsonData.shift.status);\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/shifts/{{shift_id}}/check-in",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "shifts",
+                    "{{shift_id}}",
+                    "check-in"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CheckoutShift",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 0. FAIL FAST\r",
+                      "// ===============================\r",
+                      "if (pm.response.code !== 200) {\r",
+                      "    console.log(\"ERROR RESPONSE:\", jsonData);\r",
+                      "\r",
+                      "    pm.test(\"Check-out should succeed\", function () {\r",
+                      "        pm.expect.fail(\"API failed with status \" + pm.response.code);\r",
+                      "    });\r",
+                      "\r",
+                      "    return;\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 1. STATUS CODE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 2. SUCCESS TRUE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 3. MESSAGE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Message correct\", function () {\r",
+                      "    pm.expect(jsonData.message.toLowerCase())\r",
+                      "        .to.include(\"checked out\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 4. SHIFT OBJECT\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shift object exists\", function () {\r",
+                      "    pm.expect(jsonData.shift).to.be.an(\"object\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 5. STATUS = COMPLETED\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shift status is completed\", function () {\r",
+                      "    pm.expect(jsonData.shift.status).to.eql(\"completed\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 6. actual_end_time\r",
+                      "// ===============================\r",
+                      "pm.test(\"actual_end_time exists\", function () {\r",
+                      "    pm.expect(jsonData.shift.actual_end_time).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 7. ID MATCH\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shift ID correct\", function () {\r",
+                      "    let expectedId = pm.variables.get(\"shift_id\");\r",
+                      "    pm.expect(jsonData.shift.id.toString())\r",
+                      "        .to.eql(expectedId.toString());\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/shifts/{{shift_id}}/check-out",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "shifts",
+                    "{{shift_id}}",
+                    "check-out"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CreateSchedule",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "let today = new Date();\r",
+                      "\r",
+                      "let start = new Date(today);\r",
+                      "let end = new Date(today);\r",
+                      "end.setDate(end.getDate() + 5);\r",
+                      "\r",
+                      "pm.environment.set(\"start_date\", start.toISOString().split(\"T\")[0]);\r",
+                      "pm.environment.set(\"end_date\", end.toISOString().split(\"T\")[0]);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// Parse request\r",
+                      "let req = pm.request.body.raw ? JSON.parse(pm.request.body.raw) : {};\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 0. FAIL FAST\r",
+                      "// ===============================\r",
+                      "if (pm.response.code !== 201) {\r",
+                      "    console.log(\"ERROR RESPONSE:\", jsonData);\r",
+                      "\r",
+                      "    pm.test(\"Bulk schedule should succeed\", function () {\r",
+                      "        pm.expect.fail(\"API failed with status \" + pm.response.code);\r",
+                      "    });\r",
+                      "\r",
+                      "    return;\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 1. STATUS CODE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 2. SUCCESS TRUE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 3. MESSAGE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Message correct\", function () {\r",
+                      "    pm.expect(jsonData.message.toLowerCase())\r",
+                      "        .to.include(\"scheduled\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 4. RESPONSE STRUCTURE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Response has required fields\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"created_count\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"skipped_count\");\r",
+                      "    pm.expect(jsonData).to.have.property(\"shifts\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 5. SHIFTS ARRAY\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shifts is array\", function () {\r",
+                      "    pm.expect(jsonData.shifts).to.be.an(\"array\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 6. COUNT MATCH\r",
+                      "// ===============================\r",
+                      "pm.test(\"Created count matches shifts length\", function () {\r",
+                      "    pm.expect(jsonData.created_count)\r",
+                      "        .to.eql(jsonData.shifts.length);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 7. CHECK EACH SHIFT STRUCTURE\r",
+                      "// ===============================\r",
+                      "if (jsonData.shifts.length > 0) {\r",
+                      "\r",
+                      "    pm.test(\"Each shift has valid structure\", function () {\r",
+                      "        jsonData.shifts.forEach(shift => {\r",
+                      "            pm.expect(shift).to.have.property(\"id\");\r",
+                      "            pm.expect(shift).to.have.property(\"staff_id\");\r",
+                      "            pm.expect(shift).to.have.property(\"shift_date\");\r",
+                      "            pm.expect(shift).to.have.property(\"shift_type\");\r",
+                      "            pm.expect(shift).to.have.property(\"status\");\r",
+                      "        });\r",
+                      "    });\r",
+                      "\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 8. VERIFY STAFF_ID MATCH REQUEST\r",
+                      "// ===============================\r",
+                      "pm.test(\"All shifts belong to correct staff\", function () {\r",
+                      "    jsonData.shifts.forEach(shift => {\r",
+                      "        pm.expect(shift.staff_id.toString())\r",
+                      "            .to.eql(req.staff_id.toString());\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 9. VERIFY DATE RANGE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Shift dates within range\", function () {\r",
+                      "    let start = new Date(req.start_date);\r",
+                      "    let end = new Date(req.end_date);\r",
+                      "\r",
+                      "    jsonData.shifts.forEach(shift => {\r",
+                      "        let shiftDate = new Date(shift.shift_date);\r",
+                      "        pm.expect(shiftDate >= start && shiftDate <= end).to.eql(true);\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 10. SAVE ONE SHIFT ID (OPTIONAL)\r",
+                      "// ===============================\r",
+                      "if (jsonData.shifts.length > 0) {\r",
+                      "    pm.environment.set(\"shift_id\", jsonData.shifts[0].id);\r",
+                      "}\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"staff_id\": \"10\",\r\n  \"start_date\": \"2026-03-20\",\r\n  \"end_date\": \"2026-03-25\",\r\n  \"shifts\": [\r\n    {\r\n      \"day_of_week\": 0,\r\n      \"shift_type\": \"morning\",\r\n      \"start_time\": \"09:00\",\r\n      \"end_time\": \"12:00\"\r\n    },\r\n    {\r\n      \"day_of_week\": 2,\r\n      \"shift_type\": \"afternoon\",\r\n      \"start_time\": \"13:00\",\r\n      \"end_time\": \"17:00\"\r\n    }\r\n  ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/shifts/schedule",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "shifts",
+                    "schedule"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "DeleteShift",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let jsonData = {};\r",
+                      "\r",
+                      "// Parse response an toàn\r",
+                      "try {\r",
+                      "    jsonData = pm.response.json();\r",
+                      "} catch (e) {\r",
+                      "    jsonData = {};\r",
+                      "}\r",
+                      "\r",
+                      "// 1. Status code\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. success = true\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// 3. Message đúng\r",
+                      "pm.test(\"Delete message correct\", function () {\r",
+                      "    pm.expect(jsonData.message).to.include(\"Shift cancelled\");\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/shifts/{{shift_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "shifts",
+                    "{{shift_id}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "AssignmentStaff",
+          "item": [
+            {
+              "name": "GetAssignment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 1. Status code\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. success = true\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// 3. assignments là array\r",
+                      "pm.test(\"Assignments is an array\", function () {\r",
+                      "    pm.expect(jsonData.assignments).to.be.an(\"array\");\r",
+                      "});\r",
+                      "\r",
+                      "// 4. count đúng\r",
+                      "pm.test(\"Count matches assignments length\", function () {\r",
+                      "    pm.expect(jsonData.count).to.eql(jsonData.assignments.length);\r",
+                      "});\r",
+                      "\r",
+                      "// 5. Nếu có data → check structure\r",
+                      "if (jsonData.assignments.length > 0) {\r",
+                      "    let a = jsonData.assignments[0];\r",
+                      "\r",
+                      "    pm.test(\"Assignment has required fields\", function () {\r",
+                      "        pm.expect(a).to.have.property(\"id\");\r",
+                      "        pm.expect(a).to.have.property(\"staff_id\");\r",
+                      "        pm.expect(a).to.have.property(\"maintenance_task_id\");\r",
+                      "        pm.expect(a).to.have.property(\"status\");\r",
+                      "        pm.expect(a).to.have.property(\"priority\");\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "// 6. Validate status hợp lệ\r",
+                      "pm.test(\"Assignment status is valid\", function () {\r",
+                      "    let validStatus = [\"assigned\", \"accepted\", \"in_progress\", \"completed\", \"cancelled\"];\r",
+                      "\r",
+                      "    jsonData.assignments.forEach(a => {\r",
+                      "        pm.expect(validStatus).to.include(a.status);\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "// 7. Response time\r",
+                      "pm.test(\"Response time < 500ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/assignments",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "assignments"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CreateAssignmnet",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 1. Status code\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. success = true\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// 3. Assignment object tồn tại\r",
+                      "pm.test(\"Assignment object exists\", function () {\r",
+                      "    pm.expect(jsonData.assignment).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "// 4. Lưu assignment_id cho flow sau\r",
+                      "pm.test(\"Save assignment_id\", function () {\r",
+                      "    let assignmentId = jsonData.assignment.id;\r",
+                      "    pm.environment.set(\"assignment_id\", assignmentId);\r",
+                      "});\r",
+                      "\r",
+                      "// 5. Check field cơ bản\r",
+                      "let a = jsonData.assignment;\r",
+                      "\r",
+                      "pm.test(\"Assignment has required fields\", function () {\r",
+                      "    pm.expect(a).to.have.property(\"id\");\r",
+                      "    pm.expect(a).to.have.property(\"staff_id\");\r",
+                      "    pm.expect(a).to.have.property(\"maintenance_task_id\");\r",
+                      "    pm.expect(a).to.have.property(\"status\");\r",
+                      "});\r",
+                      "\r",
+                      "// 6. Check logic business\r",
+                      "pm.test(\"Assignment status is assigned\", function () {\r",
+                      "    pm.expect(a.status).to.eql(\"assigned\");\r",
+                      "});\r",
+                      "\r",
+                      "// verify staff sau khi assign\r",
+                      "pm.sendRequest({\r",
+                      "    url: pm.environment.get(\"staff\") + \"/api/staff/\" + pm.environment.get(\"staff_id\"),\r",
+                      "    method: \"GET\",\r",
+                      "    header: {\r",
+                      "        \"Authorization\": \"Bearer \" + pm.environment.get(\"access_token\")\r",
+                      "    }\r",
+                      "}, function (err, res) {\r",
+                      "\r",
+                      "    if (res.code === 200) {\r",
+                      "        let staff = res.json().staff;\r",
+                      "\r",
+                      "        pm.test(\"Staff is resigned after assignment\", function () {\r",
+                      "            pm.expect(staff.status).to.eql(\"resigned\");\r",
+                      "        });\r",
+                      "    }\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"staff_id\": \"2\",\r\n    \"maintenance_task_id\": \"590\",\r\n    \"priority\": \"high\",\r\n    \"estimated_duration_minutes\": 120,\r\n    \"notes\": \"Auto test assignment\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/assignments",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "assignments"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "AcceptAssignment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 1. Status code\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. success true\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// 3. message đúng\r",
+                      "pm.test(\"Message is correct\", function () {\r",
+                      "    pm.expect(jsonData.message).to.eql(\"Assignment accepted\");\r",
+                      "});\r",
+                      "\r",
+                      "// 4. assignment tồn tại\r",
+                      "pm.test(\"Assignment exists\", function () {\r",
+                      "    pm.expect(jsonData.assignment).to.be.an(\"object\");\r",
+                      "});\r",
+                      "\r",
+                      "// 5. status = accepted\r",
+                      "pm.test(\"Assignment status is accepted\", function () {\r",
+                      "    pm.expect(jsonData.assignment.status).to.eql(\"accepted\");\r",
+                      "});\r",
+                      "\r",
+                      "// 6. ID đúng\r",
+                      "pm.test(\"Assignment ID matches\", function () {\r",
+                      "    let expectedId = pm.environment.get(\"assignment_id\");\r",
+                      "    pm.expect(jsonData.assignment.id.toString()).to.eql(expectedId.toString());\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/assignments/{{assignment_id}}/accept",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "assignments",
+                    "{{assignment_id}}",
+                    "accept"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "StartAssignment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Start assignment success\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// stop nếu fail\r",
+                      "if (pm.response.code !== 200) return;\r",
+                      "\r",
+                      "let a = jsonData.assignment;\r",
+                      "\r",
+                      "// 1. check object tồn tại\r",
+                      "pm.test(\"Assignment object exists\", function () {\r",
+                      "    pm.expect(a).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "// 2. check status\r",
+                      "pm.test(\"Status is in_progress\", function () {\r",
+                      "    pm.expect(a.status).to.eql(\"in_progress\");\r",
+                      "});\r",
+                      "\r",
+                      "// 3. check started_at\r",
+                      "pm.test(\"Has started_at\", function () {\r",
+                      "    pm.expect(a.started_at).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "// 4. check đúng assignment_id\r",
+                      "pm.test(\"Assignment ID correct\", function () {\r",
+                      "    pm.expect(a.id.toString()).to.eql(\r",
+                      "        pm.environment.get(\"assignment_id\").toString()\r",
+                      "    );\r",
+                      "});\r",
+                      "pm.sendRequest({\r",
+                      "    url: pm.environment.get(\"staff\") + \"/api/staff/\" + pm.environment.get(\"staff_id\"),\r",
+                      "    method: \"GET\",\r",
+                      "    header: {\r",
+                      "        \"Authorization\": \"Bearer \" + pm.environment.get(\"access_token\")\r",
+                      "    }\r",
+                      "}, function (err, res) {\r",
+                      "\r",
+                      "    if (res.code === 200) {\r",
+                      "        let staff = res.json().staff;\r",
+                      "\r",
+                      "        pm.test(\"Staff is still resigned\", function () {\r",
+                      "            pm.expect(staff.status).to.eql(\"resigned\");\r",
+                      "        });\r",
+                      "    }\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/assignments/{{assignment_id}}/start",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "assignments",
+                    "{{assignment_id}}",
+                    "start"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CompleteAssignment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Complete assignment success\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "if (pm.response.code !== 200) return;\r",
+                      "\r",
+                      "let a = jsonData.assignment;\r",
+                      "\r",
+                      "// 1. check status\r",
+                      "pm.test(\"Status is completed\", function () {\r",
+                      "    pm.expect(a.status).to.eql(\"completed\");\r",
+                      "});\r",
+                      "\r",
+                      "// 2. check completed_at\r",
+                      "pm.test(\"Has completed_at\", function () {\r",
+                      "    pm.expect(a.completed_at).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "// 3. check duration\r",
+                      "pm.test(\"Has actual duration\", function () {\r",
+                      "    pm.expect(a.actual_duration_minutes).to.be.a(\"number\");\r",
+                      "});\r",
+                      "\r",
+                      "// 4. check notes\r",
+                      "pm.test(\"Completion notes saved\", function () {\r",
+                      "    pm.expect(a.completion_notes).to.eql(\"Done Perfectly\");\r",
+                      "});\r",
+                      "pm.sendRequest({\r",
+                      "    url: pm.environment.get(\"staff\") + \"/api/staff/\" + pm.environment.get(\"staff_id\"),\r",
+                      "    method: \"GET\",\r",
+                      "    header: {\r",
+                      "        \"Authorization\": \"Bearer \" + pm.environment.get(\"access_token\")\r",
+                      "    }\r",
+                      "}, function (err, res) {\r",
+                      "\r",
+                      "    if (res.code === 200) {\r",
+                      "        let staff = res.json().staff;\r",
+                      "\r",
+                      "        pm.test(\"Staff back to active\", function () {\r",
+                      "            pm.expect(staff.status).to.eql(\"active\");\r",
+                      "        });\r",
+                      "    }\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n        \"completion_notes\": \"Done Perfectly\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/assignments/{{assignment_id}}/complete",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "assignments",
+                    "{{assignment_id}}",
+                    "complete"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "StaffUser",
+          "item": [
+            {
+              "name": "GetAllStaff",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// 1. Status code\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. success = true\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// 3. staff là array\r",
+                      "pm.test(\"Staff is an array\", function () {\r",
+                      "    pm.expect(jsonData.staff).to.be.an(\"array\");\r",
+                      "});\r",
+                      "\r",
+                      "// 4. count đúng với length\r",
+                      "pm.test(\"Count matches staff length\", function () {\r",
+                      "    pm.expect(jsonData.count).to.eql(jsonData.staff.length);\r",
+                      "});\r",
+                      "\r",
+                      "// 5. Nếu có data → check structure\r",
+                      "if (jsonData.staff.length > 0) {\r",
+                      "    let staff = jsonData.staff[0];\r",
+                      "    pm.environment.set(\"staff_id\", jsonData.staff[0].id);\r",
+                      "    pm.test(\"Staff object has required fields\", function () {\r",
+                      "        pm.expect(staff).to.have.property(\"id\");\r",
+                      "        pm.expect(staff).to.have.property(\"full_name\");\r",
+                      "        pm.expect(staff).to.have.property(\"email\");\r",
+                      "        pm.expect(staff).to.have.property(\"role\");\r",
+                      "        pm.expect(staff).to.have.property(\"status\");\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/staff",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "staff"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GetById",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "//Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "//\r",
+                      "// 1. Status code\r",
+                      "//\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 2. success = true\r",
+                      "//\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 3. Có object staff\r",
+                      "//\r",
+                      "pm.test(\"Response has staff object\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"staff\");\r",
+                      "});\r",
+                      "\r",
+                      "let staff = jsonData.staff;\r",
+                      "\r",
+                      "//\r",
+                      "// 4. Validate structure\r",
+                      "//\r",
+                      "pm.test(\"Staff has required fields\", function () {\r",
+                      "    pm.expect(staff).to.have.property(\"id\");\r",
+                      "    pm.expect(staff).to.have.property(\"full_name\");\r",
+                      "    pm.expect(staff).to.have.property(\"email\");\r",
+                      "    pm.expect(staff).to.have.property(\"role\");\r",
+                      "    pm.expect(staff).to.have.property(\"status\");\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 5. Validate đúng ID request\r",
+                      "//\r",
+                      "pm.test(\"Returned correct staff ID\", function () {\r",
+                      "    let staffId = pm.request.url.variables.get(\"staff_id\") || pm.request.url.path.slice(-1)[0];\r",
+                      "    pm.expect(staff.id.toString()).to.eql(staffId.toString());\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 6. Validate email format (basic)\r",
+                      "//\r",
+                      "pm.test(\"Email format is valid\", function () {\r",
+                      "    pm.expect(staff.email).to.include(\"@\");\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 7. Validate role hợp lệ\r",
+                      "//\r",
+                      "const validRoles = [\"technician\", \"manager\", \"supervisor\"];\r",
+                      "\r",
+                      "pm.test(\"Role is valid\", function () {\r",
+                      "    pm.expect(validRoles).to.include(staff.role);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 8. Validate status hợp lệ\r",
+                      "//\r",
+                      "const validStatus = [\"active\", \"inactive\", \"resigned\"];\r",
+                      "\r",
+                      "pm.test(\"Status is valid\", function () {\r",
+                      "    pm.expect(validStatus).to.include(staff.status);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 9. Nếu có certificates / shifts → check array\r",
+                      "//\r",
+                      "if (staff.certificates) {\r",
+                      "    pm.test(\"Certificates is array\", function () {\r",
+                      "        pm.expect(staff.certificates).to.be.an(\"array\");\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "if (staff.recent_shifts) {\r",
+                      "    pm.test(\"Recent shifts is array\", function () {\r",
+                      "        pm.expect(staff.recent_shifts).to.be.an(\"array\");\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "if (staff.recent_assignments) {\r",
+                      "    pm.test(\"Recent assignments is array\", function () {\r",
+                      "        pm.expect(staff.recent_assignments).to.be.an(\"array\");\r",
+                      "    });\r",
+                      "}\r",
+                      "// Lưu staff-id\r",
+                      "pm.environment.set(\"staff_id\", staff.id);\r",
+                      "//\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/staff/{{staff_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "staff",
+                    "{{staff_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CreateStaff",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "// Parse request (dữ liệu bạn gửi lên)\r",
+                      "let req = pm.request.body.raw ? JSON.parse(pm.request.body.raw) : {};\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 1. STATUS CODE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 2. RESPONSE FORMAT\r",
+                      "// ===============================\r",
+                      "pm.test(\"Response is JSON\", function () {\r",
+                      "    pm.response.to.be.json;\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 3. CHECK STAFF OBJECT EXISTS\r",
+                      "// ===============================\r",
+                      "pm.test(\"Staff object exists\", function () {\r",
+                      "    pm.expect(jsonData.staff).to.be.an(\"object\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 4. SAVE STAFF ID (QUAN TRỌNG)\r",
+                      "// ===============================\r",
+                      "pm.test(\"Save staff_id\", function () {\r",
+                      "    pm.expect(jsonData.staff.id).to.exist;\r",
+                      "    pm.environment.set(\"staff_id\", jsonData.staff.id);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 5. CHECK BASIC FIELDS (AN TOÀN)\r",
+                      "// ===============================\r",
+                      "pm.test(\"Staff has required fields\", function () {\r",
+                      "    pm.expect(jsonData.staff).to.have.property(\"id\");\r",
+                      "    pm.expect(jsonData.staff).to.have.property(\"full_name\");\r",
+                      "    pm.expect(jsonData.staff).to.have.property(\"role\");\r",
+                      "    pm.expect(jsonData.staff).to.have.property(\"status\");\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 6. VERIFY DATA MATCH REQUEST\r",
+                      "// (CHỈ CHECK FIELD CÓ TRONG RESPONSE)\r",
+                      "// ===============================\r",
+                      "pm.test(\"Fields match request (safe check)\", function () {\r",
+                      "\r",
+                      "    if (req.full_name && jsonData.staff.full_name !== undefined) {\r",
+                      "        pm.expect(jsonData.staff.full_name).to.eql(req.full_name);\r",
+                      "    }\r",
+                      "\r",
+                      "    if (req.role && jsonData.staff.role !== undefined) {\r",
+                      "        pm.expect(jsonData.staff.role.toLowerCase())\r",
+                      "            .to.eql(req.role.toLowerCase());\r",
+                      "    }\r",
+                      "\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 7. STATUS DEFAULT\r",
+                      "// ===============================\r",
+                      "pm.test(\"Default status is active\", function () {\r",
+                      "    pm.expect(jsonData.staff.status).to.eql(\"active\");\r",
+                      "});\r",
+                      "\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"username\": \"staff31\",\r\n  \"email\": \"HuynhThanhTam208@gamil.com\",\r\n  \"full_name\": \"Huynh Thanh Tam\",\r\n  \"role\": \"technician\",\r\n  \"phone\": \"0894537608\"\r\n \r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/staff",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "staff"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "UpdateStaff",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "//\r",
+                      "// 1. Status code\r",
+                      "//\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 2. success = true\r",
+                      "//\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 3. Có message\r",
+                      "//\r",
+                      "pm.test(\"Response has message\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"message\");\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 4. Có object staff\r",
+                      "//\r",
+                      "pm.test(\"Response has staff object\", function () {\r",
+                      "    pm.expect(jsonData).to.have.property(\"staff\");\r",
+                      "});\r",
+                      "\r",
+                      "let staff = jsonData.staff;\r",
+                      "\r",
+                      "//\r",
+                      "// 5. Validate structure\r",
+                      "//\r",
+                      "pm.test(\"Staff has required fields\", function () {\r",
+                      "    pm.expect(staff).to.have.property(\"id\");\r",
+                      "    pm.expect(staff).to.have.property(\"full_name\");\r",
+                      "    pm.expect(staff).to.have.property(\"email\");\r",
+                      "    pm.expect(staff).to.have.property(\"role\");\r",
+                      "    pm.expect(staff).to.have.property(\"status\");\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 6. Validate data update đúng với request\r",
+                      "//\r",
+                      "let req = pm.request.body.raw ? JSON.parse(pm.request.body.raw) : {};\r",
+                      "\r",
+                      "pm.test(\"Updated fields match request\", function () {\r",
+                      "    if (req.full_name) {\r",
+                      "        pm.expect(staff.full_name).to.eql(req.full_name);\r",
+                      "    }\r",
+                      "    if (req.email) {\r",
+                      "        pm.expect(staff.email).to.eql(req.email);\r",
+                      "    }\r",
+                      "    if (req.phone) {\r",
+                      "        pm.expect(staff.phone).to.eql(req.phone);\r",
+                      "    }\r",
+                      "    if (req.role) {\r",
+                      "        pm.expect(staff.role).to.eql(req.role);\r",
+                      "    }\r",
+                      "    if (req.specialization) {\r",
+                      "        pm.expect(staff.specialization).to.eql(req.specialization);\r",
+                      "    }\r",
+                      "    if (req.status) {\r",
+                      "        pm.expect(staff.status).to.eql(req.status);\r",
+                      "    }\r",
+                      "    if (req.department) {\r",
+                      "        pm.expect(staff.department).to.eql(req.department);\r",
+                      "    }\r",
+                      "    if (req.employee_code) {\r",
+                      "        pm.expect(staff.employee_code).to.eql(req.employee_code);\r",
+                      "    }\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 7. Validate ID không bị thay đổi\r",
+                      "//\r",
+                      "pm.test(\"Staff ID remains unchanged\", function () {\r",
+                      "    let staffId = pm.environment.get(\"staff_id\");\r",
+                      "\r",
+                      "    if (!staffId) {\r",
+                      "        let url = pm.request.url.toString();\r",
+                      "        staffId = url.split(\"/\").pop();\r",
+                      "    }\r",
+                      "\r",
+                      "    pm.expect(staff.id.toString()).to.eql(staffId.toString());\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 8. Validate role hợp lệ\r",
+                      "//\r",
+                      "const validRoles = [\"technician\", \"manager\", \"supervisor\"];\r",
+                      "\r",
+                      "pm.test(\"Role is valid\", function () {\r",
+                      "    pm.expect(validRoles).to.include(staff.role);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 9. Validate status hợp lệ\r",
+                      "//\r",
+                      "const validStatus = [\"active\", \"inactive\", \"resigned\"];\r",
+                      "\r",
+                      "pm.test(\"Status is valid\", function () {\r",
+                      "    pm.expect(validStatus).to.include(staff.status);\r",
+                      "});\r",
+                      "\r",
+                      "//\r",
+                      "// 10. Response time\r",
+                      "//\r",
+                      "pm.test(\"Response time < 500ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"department\": \"Technycal Department\",\r\n    \"status\": \"active\"\r\n    \r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/staff/{{staff_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "staff",
+                    "{{staff_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "DeleteStaff",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response (nếu có body)\r",
+                      "let jsonData = {};\r",
+                      "try {\r",
+                      "    jsonData = pm.response.json();\r",
+                      "} catch (e) {\r",
+                      "    jsonData = {};\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 1. STATUS CODE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Status code is 200 or 204\", function () {\r",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 2. RESPONSE SUCCESS (nếu có)\r",
+                      "// ===============================\r",
+                      "if (pm.response.code === 200) {\r",
+                      "    pm.test(\"Response success is true\", function () {\r",
+                      "        pm.expect(jsonData.success).to.eql(true);\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 3. RESPONSE MESSAGE (OPTIONAL)\r",
+                      "// ===============================\r",
+                      "if (jsonData.message) {\r",
+                      "    pm.test(\"Delete message exists\", function () {\r",
+                      "        pm.expect(jsonData.message).to.be.a(\"string\");\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 4. SAVE DELETED ID (LOG)\r",
+                      "// ===============================\r",
+                      "pm.test(\"Deleted staff_id logged\", function () {\r",
+                      "    let staffId = pm.environment.get(\"staff_id\");\r",
+                      "    console.log(\"Deleted staff_id:\", staffId);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 5. RESPONSE TIME\r",
+                      "// ===============================\r",
+                      "pm.test(\"Response time < 500ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/staff/{{staff_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "staff",
+                    "{{staff_id}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "CertificateStaff",
+          "item": [
+            {
+              "name": "CreateCertificate",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "if (pm.response.code !== 201) return;\r",
+                      "\r",
+                      "// 1. success\r",
+                      "pm.test(\"Success true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// 2. object tồn tại\r",
+                      "let c = jsonData.certificate;\r",
+                      "\r",
+                      "pm.test(\"Certificate exists\", function () {\r",
+                      "    pm.expect(c).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "// 3. save ID (QUAN TRỌNG)\r",
+                      "pm.environment.set(\"certificate_id\", c.id);\r",
+                      "\r",
+                      "console.log(\"certificate_id:\", c.id);\r",
+                      "\r",
+                      "// 4. check fields\r",
+                      "let req = JSON.parse(pm.request.body.raw);\r",
+                      "\r",
+                      "pm.test(\"Fields match request\", function () {\r",
+                      "    pm.expect(c.staff_id.toString()).to.eql(req.staff_id.toString());\r",
+                      "    pm.expect(c.certificate_name).to.eql(req.certificate_name);\r",
+                      "    pm.expect(c.certificate_type).to.eql(req.certificate_type);\r",
+                      "});\r",
+                      "\r",
+                      "// 5. status mặc định\r",
+                      "pm.test(\"Status is valid\", function () {\r",
+                      "    pm.expect(c.status).to.eql(\"valid\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"staff_id\": 7,\r\n    \"certificate_name\": \"EV Battery Specialist\",\r\n    \"certificate_type\": \"ev_certification\",\r\n    \"issued_date\": \"2024-01-01\",\r\n    \"expiry_date\": \"2026-01-01\",\r\n    \"issuing_organization\": \"VinFast Academy\",\r\n    \"certificate_number\": \"EVBS-2024-001\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/certificates",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certificates"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GetAllCertificate",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "\r",
+                      "// 1. Status code\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 2. success = true\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 3. certificates là array\r",
+                      "pm.test(\"Certificates is an array\", function () {\r",
+                      "    pm.expect(jsonData.certificates).to.be.an(\"array\");\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 4. count đúng với length\r",
+                      "pm.test(\"Count matches certificates length\", function () {\r",
+                      "    pm.expect(jsonData.count).to.eql(jsonData.certificates.length);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 5. Nếu có data → check structure\r",
+                      "if (jsonData.certificates.length > 0) {\r",
+                      "\r",
+                      "    let c = jsonData.certificates[0];\r",
+                      "\r",
+                      "    pm.test(\"Certificate object has required fields\", function () {\r",
+                      "        pm.expect(c).to.have.property(\"id\");\r",
+                      "        pm.expect(c).to.have.property(\"staff_id\");\r",
+                      "        pm.expect(c).to.have.property(\"certificate_name\");\r",
+                      "        pm.expect(c).to.have.property(\"certificate_type\");\r",
+                      "        pm.expect(c).to.have.property(\"status\");\r",
+                      "    });\r",
+                      "\r",
+                      "    // 6. Validate kiểu dữ liệu\r",
+                      "    pm.test(\"Certificate fields have correct types\", function () {\r",
+                      "        pm.expect(c.id).to.be.a(\"number\");\r",
+                      "        pm.expect(c.staff_id).to.be.a(\"number\");\r",
+                      "        pm.expect(c.certificate_name).to.be.a(\"string\");\r",
+                      "        pm.expect(c.certificate_type).to.be.a(\"string\");\r",
+                      "        pm.expect(c.status).to.be.a(\"string\");\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "\r",
+                      "// 7. Validate toàn bộ list (loop)\r",
+                      "pm.test(\"All certificates have valid status\", function () {\r",
+                      "    jsonData.certificates.forEach(c => {\r",
+                      "        pm.expect([\"valid\", \"expired\", \"pending_renewal\"]).to.include(c.status);\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "// 9. Response time\r",
+                      "pm.test(\"Response time < 500ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 10. Không bị null\r",
+                      "pm.test(\"Certificates not null\", function () {\r",
+                      "    pm.expect(jsonData.certificates).to.not.be.null;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/certificates",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certificates"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "UpdateCertificate",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "\r",
+                      "// 1. Status code\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// stop nếu fail\r",
+                      "if (pm.response.code !== 200) return;\r",
+                      "\r",
+                      "\r",
+                      "// 2. success = true\r",
+                      "pm.test(\"Response success is true\", function () {\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 3. certificate tồn tại\r",
+                      "let c = jsonData.certificate;\r",
+                      "\r",
+                      "pm.test(\"Certificate object exists\", function () {\r",
+                      "    pm.expect(c).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 4. Lấy request body\r",
+                      "let req = {};\r",
+                      "try {\r",
+                      "    req = JSON.parse(pm.request.body.raw);\r",
+                      "} catch (e) {}\r",
+                      "\r",
+                      "\r",
+                      "// 5. Verify fields update đúng\r",
+                      "pm.test(\"Updated fields match request\", function () {\r",
+                      "\r",
+                      "    if (req.certificate_name) {\r",
+                      "        pm.expect(c.certificate_name).to.eql(req.certificate_name);\r",
+                      "    }\r",
+                      "\r",
+                      "    if (req.certificate_type) {\r",
+                      "        pm.expect(c.certificate_type).to.eql(req.certificate_type);\r",
+                      "    }\r",
+                      "\r",
+                      "    if (req.status) {\r",
+                      "        pm.expect(c.status).to.eql(req.status);\r",
+                      "    }\r",
+                      "\r",
+                      "    if (req.issuing_organization) {\r",
+                      "        pm.expect(c.issuing_organization).to.eql(req.issuing_organization);\r",
+                      "    }\r",
+                      "\r",
+                      "    if (req.certificate_number) {\r",
+                      "        pm.expect(c.certificate_number).to.eql(req.certificate_number);\r",
+                      "    }\r",
+                      "\r",
+                      "    if (req.notes) {\r",
+                      "        pm.expect(c.notes).to.eql(req.notes);\r",
+                      "    }\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "// 6. ID không đổi\r",
+                      "pm.test(\"Certificate ID remains unchanged\", function () {\r",
+                      "    pm.expect(c.id.toString())\r",
+                      "      .to.eql(pm.environment.get(\"certificate_id\").toString());\r",
+                      "});\r",
+                      "\r",
+                      "\r",
+                      "\r",
+                      "\r",
+                      "// 8. Validate status hợp lệ\r",
+                      "pm.test(\"Status is valid value\", function () {\r",
+                      "    pm.expect([\"valid\", \"expired\", \"pending_renewal\"]).to.include(c.status);\r",
+                      "});\r",
+                      "//\r",
+                      "\r",
+                      "// 9. Response time\r",
+                      "pm.test(\"Response time < 500ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \r\n    \"status\": \"pending_renewal\",\r\n    \"issuing_organization\": \"Updated Org\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/certificates/{{certificate_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certificates",
+                    "{{certificate_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "DeleteCertificate",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Parse response (nếu có body)\r",
+                      "let jsonData = {};\r",
+                      "try {\r",
+                      "    jsonData = pm.response.json();\r",
+                      "} catch (e) {\r",
+                      "    jsonData = {};\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 1. STATUS CODE\r",
+                      "// ===============================\r",
+                      "pm.test(\"Status code is 200 or 204\", function () {\r",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                      "});\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 2. RESPONSE SUCCESS (nếu có)\r",
+                      "// ===============================\r",
+                      "if (pm.response.code === 200) {\r",
+                      "    pm.test(\"Response success is true\", function () {\r",
+                      "        pm.expect(jsonData.success).to.eql(true);\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 3. RESPONSE MESSAGE (OPTIONAL)\r",
+                      "// ===============================\r",
+                      "if (jsonData.message) {\r",
+                      "    pm.test(\"Delete message exists\", function () {\r",
+                      "        pm.expect(jsonData.message).to.be.a(\"string\");\r",
+                      "    });\r",
+                      "}\r",
+                      "\r",
+                      "// ===============================\r",
+                      "// 4. SAVE DELETED ID (LOG)\r",
+                      "// ===============================\r",
+                      "pm.test(\"Deleted staff_id logged\", function () {\r",
+                      "    let staffId = pm.environment.get(\"staff_id\");\r",
+                      "    console.log(\"Deleted staff_id:\", staffId);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/certificates/{{certificate_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certificates",
+                    "{{certificate_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GetExpiring",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Expiring soon valid\", function () {\r",
+                      "    let res = pm.response.json();\r",
+                      "    res.certificates.forEach(c => {\r",
+                      "        pm.expect(c.status).to.eql(\"valid\");\r",
+                      "    });\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/certificates/expiring-soon",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "certificates",
+                    "expiring-soon"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "InternalStaff",
+          "item": [
+            {
+              "name": "GetAvailable",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let res = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Check respone status and success field\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "    pm.expect(res.success).to.eql(true);\r",
+                      "    pm.expect(res.staff).to.be.an(\"array\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/internal/staff/available",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "staff",
+                    "available"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GetStaffInfor",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let res = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Get staff OK\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "    pm.expect(res.staff.id.toString())\r",
+                      "      .to.eql(pm.environment.get(\"staff_id\").toString());\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/internal/staff/{{staff_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "staff",
+                    "{{staff_id}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "PerformanceStaff",
+          "item": [
+            {
+              "name": "GetCurrentPerformance",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let res = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Get current performance OK\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "    pm.expect(res.success).to.eql(true);\r",
+                      "    pm.expect(res.performance.staff_id.toString())\r",
+                      "      .to.eql(pm.environment.get(\"staff_id\").toString());\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/performance/staff/{{staff_id}}/current",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "performance",
+                    "staff",
+                    "{{staff_id}}",
+                    "current"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CreatePerformance",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let res = pm.response.json();\r",
+                      "\r",
+                      "//  Status\r",
+                      "pm.test(\"Status 201\", () => {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "//  lưu performance_id\r",
+                      "if (res.performance) {\r",
+                      "    pm.environment.set(\"performance_id\", res.performance.id);\r",
+                      "}\r",
+                      "//  check đúng staff\r",
+                      "pm.test(\"Correct staff_id\", () => {\r",
+                      "    pm.expect(res.performance.staff_id.toString())\r",
+                      "      .to.eql(pm.environment.get(\"staff_id\").toString());\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n        \"staff_id\": 21,\r\n        \"period_type\": \"monthly\",\r\n        \"period_start\": \"2025-12-01\",\r\n        \"period_end\": \"2025-12-31\",\r\n        \"manager_rating\": 4.5,\r\n        \"manager_notes\": \"Làm việc xuất sắc\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/performance",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "performance"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "UpdatePerformance",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let res = pm.response.json();\r",
+                      "\r",
+                      "//  Status\r",
+                      "pm.test(\"Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "//  success\r",
+                      "pm.test(\"Success true\", () => {\r",
+                      "    pm.expect(res.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "// có performance\r",
+                      "pm.test(\"Performance exists\", () => {\r",
+                      "    pm.expect(res.performance).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "//  check manager_rating\r",
+                      "pm.test(\"Manager rating updated\", () => {\r",
+                      "    pm.expect(res.performance.manager_rating).to.eql(5);\r",
+                      "});\r",
+                      "\r",
+                      "// check manager_notes\r",
+                      "pm.test(\"Manager notes updated\", () => {\r",
+                      "    pm.expect(res.performance.manager_notes).to.eql(\"Excellent\");\r",
+                      "});\r",
+                      "\r",
+                      "// check đúng performance_id\r",
+                      "pm.test(\"Correct performance_id\", () => {\r",
+                      "    pm.expect(res.performance.id.toString())\r",
+                      "      .to.eql(pm.environment.get(\"performance_id\").toString());\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"manager_rating\": 5,\r\n  \"manager_notes\": \"Excellent\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{staff}}/api/performance/{{performance_id}}",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "performance",
+                    "{{performance_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GetAllPerformance",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let res = pm.response.json();\r",
+                      "// Status\r",
+                      "pm.test(\"Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "// check structure cơ bản\r",
+                      "if (res.performances.length > 0) {\r",
+                      "    pm.test(\"Performance has required fields\", () => {\r",
+                      "        let p = res.performances[0];\r",
+                      "        pm.expect(p).to.have.property(\"id\");\r",
+                      "        pm.expect(p).to.have.property(\"staff_id\");\r",
+                      "        pm.expect(p).to.have.property(\"period_type\");\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/performance",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "performance"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GetDashboard",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "let res = pm.response.json();\r",
+                      "\r",
+                      "// Status\r",
+                      "pm.test(\"Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "//  nếu có data → check structure\r",
+                      "if (res.dashboard.length > 0) {\r",
+                      "\r",
+                      "    pm.test(\"Dashboard item structure valid\", () => {\r",
+                      "        let item = res.dashboard[0];\r",
+                      "\r",
+                      "        pm.expect(item).to.have.property(\"staff\");\r",
+                      "        pm.expect(item).to.have.property(\"performance\");\r",
+                      "\r",
+                      "        pm.expect(item.staff).to.have.property(\"id\");\r",
+                      "        pm.expect(item.performance).to.have.property(\"tasks_completed\");\r",
+                      "    });\r",
+                      "\r",
+                      "    //  check sắp xếp giảm dần theo tasks_completed\r",
+                      "    pm.test(\"Sorted by tasks_completed desc\", () => {\r",
+                      "        for (let i = 0; i < res.dashboard.length - 1; i++) {\r",
+                      "            let current = res.dashboard[i].performance.tasks_completed;\r",
+                      "            let next = res.dashboard[i + 1].performance.tasks_completed;\r",
+                      "            pm.expect(current).to.be.at.least(next);\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/api/performance/dashboard",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "api",
+                    "performance",
+                    "dashboard"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "if (pm.request.url.toString().includes(\"/login\")) {\r",
+          "    // không gắn token cho login\r",
+          "} else {\r",
+          "    let token = pm.environment.get(\"access_token\");\r",
+          "\r",
+          "    if (token) {\r",
+          "       pm.request.headers.upsert({\r",
+          "            key: \"Authorization\",\r",
+          "            value: \"Bearer \" + token\r",
+          "        });\r",
+          "    }\r",
+          "}\r",
+          "pm.request.headers.upsert({\r",
+          "    key: \"X-Internal-Token\",\r",
+          "    value: pm.environment.get(\"internal_token\")\r",
+          "});"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
