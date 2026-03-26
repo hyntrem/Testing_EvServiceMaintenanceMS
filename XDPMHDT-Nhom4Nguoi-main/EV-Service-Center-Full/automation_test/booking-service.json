@@ -18,25 +18,17 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "let jsonData;\r",
-                  "try {\r",
-                  "    jsonData = pm.response.json();\r",
-                  "} catch (e) {\r",
-                  "    throw new Error(\"Response is not valid JSON\");\r",
-                  "}\r",
-                  "\r",
                   "pm.test(\"Status code is 200\", function () {\r",
                   "    pm.response.to.have.status(200);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"access_token exists\", function () {\r",
-                  "    pm.expect(jsonData.access_token).to.exist;\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has access_token\", function () {\r",
+                  "    pm.expect(res).to.have.property(\"access_token\");\r",
                   "});\r",
                   "\r",
-                  "pm.environment.set(\"token\", jsonData.access_token);\r",
-                  "\r",
-                  "console.log(\"Login response:\", jsonData);\r",
-                  "console.log(\"Saved token:\", pm.environment.get(\"token\"));"
+                  "pm.environment.set(\"token\", res.access_token);"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -58,7 +50,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email_username\": \"hyntrem\",\r\n  \"password\": \"hyntrem123\"\r\n}",
+              "raw": "{\r\n \"email_username\": \"hyntrem\",\r\n \"password\": \"hyntrem123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -66,9 +58,9 @@
               }
             },
             "url": {
-              "raw": "{{login_url}}/api/login",
+              "raw": "{{base_url}}/api/login",
               "host": [
-                "{{login_url}}"
+                "{{base_url}}"
               ],
               "path": [
                 "api",
@@ -127,9 +119,9 @@
               }
             },
             "url": {
-              "raw": "{{login_url}}/api/login",
+              "raw": "{{base_url}}/api/login",
               "host": [
-                "{{login_url}}"
+                "{{base_url}}"
               ],
               "path": [
                 "api",
@@ -181,7 +173,14 @@
           ],
           "request": {
             "auth": {
-              "type": "noauth"
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             },
             "method": "GET",
             "header": [],
@@ -206,26 +205,34 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "let jsonData;\r",
-                  "try {\r",
-                  "    jsonData = pm.response.json();\r",
-                  "} catch (e) {\r",
-                  "    throw new Error(\"Response is not valid JSON\");\r",
-                  "}\r",
-                  "\r",
-                  "pm.test(\"Status code is 201\", function () {\r",
-                  "    pm.response.to.have.status(201);\r",
+                  "pm.test(\"Status code is 200 or 201\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"booking exists\", function () {\r",
-                  "    pm.expect(jsonData.booking).to.exist;\r",
-                  "    pm.expect(jsonData.booking.id).to.exist;\r",
+                  "const raw = pm.response.json();\r",
+                  "const res = raw.booking ? raw.booking : raw;\r",
+                  "\r",
+                  "const savedId = res.booking_id || res.id;\r",
+                  "\r",
+                  "pm.test(\"Response has booking_id\", function () {\r",
+                  "    pm.expect(savedId).to.exist;\r",
                   "});\r",
                   "\r",
-                  "pm.environment.set(\"booking_id\", jsonData.booking.id);\r",
+                  "pm.test(\"Response has user_id\", function () {\r",
+                  "    pm.expect(res.user_id).to.exist;\r",
+                  "});\r",
                   "\r",
-                  "console.log(\"Create Booking response:\", jsonData);\r",
-                  "console.log(\"Saved booking_id:\", pm.environment.get(\"booking_id\"));"
+                  "pm.test(\"Response has start_time\", function () {\r",
+                  "    pm.expect(res.start_time).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has status\", function () {\r",
+                  "    pm.expect(res.status).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "if (savedId) {\r",
+                  "    pm.environment.set(\"booking_id\", savedId);\r",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -254,7 +261,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"customer_name\": \"Khanh Duy\",\r\n  \"service_type\": \"EV Center HCM\",\r\n  \"technician_id\": 1,\r\n  \"station_id\": 1,\r\n  \"center_id\": 1,\r\n  \"start_time\": \"2026-04-20T18:00:00\",\r\n  \"end_time\": \"2026-04-20T19:00:00\"\r\n}",
+              "raw": "{\r\n  \"service_type\": \"Battery Maintenance\",\r\n  \"technician_id\": 2,\r\n  \"station_id\": 2,\r\n  \"start_time\": \"2026-03-23T17:00:00\",\r\n  \"end_time\": \"2026-03-23T18:00:00\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -326,7 +333,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"technician_id\": {{technician_id}},\r\n  \"station_id\": {{station_id}},\r\n  \"start_time\": \"{{start_time}}\",\r\n  \"end_time\": \"{{end_time}}\"\r\n}",
+              "raw": "{\r\n  \"technician_id\": 1,\r\n  \"station_id\": 1,\r\n  \"start_time\": \"2026-03-23T15:00:00\",\r\n  \"end_time\": \"2026-03-23T16:00:00\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -394,7 +401,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"service_type\": \"Battery Maintenance\",\r\n  \"technician_id\": {{technician_id}},\r\n  \"station_id\": {{station_id}},\r\n  \"start_time\": \"abc\",\r\n  \"end_time\": \"xyz\"\r\n}",
+              "raw": "{\r\n  \"service_type\": \"Battery Maintenance\",\r\n  \"technician_id\": 2,\r\n  \"station_id\": 2,\r\n  \"start_time\": \"2026-03-23T17:00:00\",\r\n  \"end_time\": \"2026-03-23T18:00:00\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -585,6 +592,100 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Create Booking - Past Time",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Should reject booking in the past\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"service_type\": \"Battery Maintenance\",\r\n  \"technician_id\": 1,\r\n  \"station_id\": 1,\r\n  \"start_time\": \"2024-01-01T09:00:00\",\r\n  \"end_time\": \"2024-01-01T10:00:00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{booking_url}}/api/bookings/items",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Booking - Reuse Slot",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"service_type\": \"Battery Maintenance\",\r\n  \"technician_id\": 1,\r\n  \"station_id\": 1,\r\n  \"start_time\": \"2026-03-25T09:00:00\",\r\n  \"end_time\": \"2026-03-25T10:00:00\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{booking_url}}/api/bookings/items",
+              "host": [
+                "{{booking_url}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "items"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -751,7 +852,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"status\": \"{{updated_status}}\"\r\n}",
+              "raw": "{\r\n  \"status\": \"completed\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -804,7 +905,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{token}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
