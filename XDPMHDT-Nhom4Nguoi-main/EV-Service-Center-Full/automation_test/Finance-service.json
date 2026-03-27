@@ -103,6 +103,7 @@
               "pm.environment.set(\"invoice_id\", res.invoice.id);\r",
               "pm.environment.set(\"payment_amount\", res.invoice.total_amount);\r",
               "pm.environment.set(\"invoice_status\", res.invoice.status);\r",
+              "pm.environment.set(\"user_id\", res.user_id || res.invoice.user_id);\r",
               "\r",
               "pm.test(\"invoice_id saved\", function () {\r",
               "    pm.expect(pm.environment.get(\"invoice_id\")).to.exist;\r",
@@ -240,8 +241,27 @@
         }
       ],
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
         "method": "POST",
         "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"booking_id\": {{booking_id}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
         "url": {
           "raw": "{{base_url_finance}}/api/invoices/",
           "host": [
