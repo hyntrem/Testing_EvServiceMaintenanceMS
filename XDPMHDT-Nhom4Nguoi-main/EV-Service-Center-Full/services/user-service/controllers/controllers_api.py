@@ -1,4 +1,4 @@
-# File: api_routes.py
+# File:controller_api.py
 from functools import wraps
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import (
@@ -54,8 +54,8 @@ def admin_required():
                 return jsonify(error="Admins only!"), 403
         return decorator
     return wrapper
-
-# --- JWT Callbacks ---
+    
+    #-- JWT Callbacks ---
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
     identity = jwt_data["sub"]
@@ -99,40 +99,55 @@ def login():
     access_token = create_access_token(identity=str(user.user_id))
     return jsonify(access_token=access_token)
 
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import jsonify
+from app import r
+from models.user import User
+import os
+import random
+
 @api_bp.route("/send-otp", methods=["POST"])
 @jwt_required()
 def send_otp():
-    from flask_jwt_extended import get_jwt_identity
-    from app import r
-    from models.user import User
-    import os
-    import random
+    try:
+        user_id = int(get_jwt_identity())
 
-    user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
 
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+        # 🔥 normalize email (RẤT QUAN TRỌNG)
+        email = user.email.strip().lower()
 
-    email = user.email
+        otp = str(random.randint(100000, 999999))
 
-    otp = str(random.randint(100000, 999999))
+        # ❗ BẮT BUỘC Redis phải tồn tại
+        if not r:
+            print("❌ Redis not connected")
+            return jsonify({"error": "Redis not connected"}), 500
 
-    if r:
-        r.set(f"otp:{email}", otp, ex=300)
+        # 🔥 lưu OTP
+        key = f"otp:{email}"
+        r.set(key, otp, ex=300)
 
-    print("Send OTP:", otp)
+        print("✅ OTP SAVED:", key, otp)
 
-    if os.getenv("TEST_MODE", "true") == "true":
+        if os.getenv("TEST_MODE", "true") == "true":
+            return jsonify({
+                "message": "OTP sent (test mode)",
+                "otp": otp
+            }), 200
+
         return jsonify({
-            "message": "OTP sent (test mode)",
-            "otp": otp
+            "message": "OTP sent to email"
         }), 200
 
-    return jsonify({
-        "message": "OTP sent to email"
-    }), 200
-
+    except Exception as e:
+        print("ERROR in /send-otp:", str(e))
+        return jsonify({
+            "error": "Internal server error",
+            "details": str(e)
+        }), 500
 @api_bp.route("/reset-password", methods=["POST"])
 def reset_password():
     data = request.get_json()
@@ -179,6 +194,7 @@ def get_profile_details():
     return jsonify(serialize_profile(profile)), 200
 
 # --- Account Endpoints ---
+# --- Account Endpoints ---
 @api_bp.route("/account", methods=["PUT"])
 @jwt_required()
 def update_my_account():
@@ -187,7 +203,6 @@ def update_my_account():
     if error:
         return jsonify({"error": error}), 400
     return jsonify({"message": "Account updated", "user": serialize_user(user)}), 200
-
 @api_bp.route("/account", methods=["DELETE"])
 @jwt_required()
 def delete_my_account():
