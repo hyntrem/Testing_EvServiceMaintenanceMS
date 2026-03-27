@@ -1,263 +1,1162 @@
 {
   "info": {
     "_postman_id": "46cbb1bb-5fcf-45e8-ab8c-134b4fa8f1fc",
-    "name": "User API",
+    "name": "user-service",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "49269562",
     "_collection_link": "https://go.postman.co/collection/49269562-46cbb1bb-5fcf-45e8-ab8c-134b4fa8f1fc?source=collection_link"
   },
   "item": [
     {
-      "name": "LOGIN",
-      "request": {
-        "auth": {
-          "type": "bearer"
-        },
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n \"email_username\": \"admin1\",\r\n \"password\": \"12345\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "Profile",
+      "item": [
+        {
+          "name": "CREATE PROFILE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// ===================== 1. STATUS =====================\r",
+                  "pm.test(\"Status code is 200 or 201\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 2. PARSE =====================\r",
+                  "let jsonData;\r",
+                  "try {\r",
+                  "    jsonData = pm.response.json();\r",
+                  "} catch (e) {\r",
+                  "    throw new Error(\"Response is not JSON\");\r",
+                  "}\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 3. STRUCTURE =====================\r",
+                  "pm.test(\"Response has profile object\", function () {\r",
+                  "    pm.expect(jsonData).to.have.property(\"profile\");\r",
+                  "});\r",
+                  "\r",
+                  "let profile = jsonData.profile;\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 4. FIELD VALIDATION =====================\r",
+                  "pm.test(\"Profile contains required fields\", function () {\r",
+                  "    pm.expect(profile).to.have.property(\"full_name\");\r",
+                  "    pm.expect(profile).to.have.property(\"phone_number\");\r",
+                  "    pm.expect(profile).to.have.property(\"address\");\r",
+                  "    pm.expect(profile).to.have.property(\"vin_number\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 5. DATA VALIDATION =====================\r",
+                  "let requestData = JSON.parse(pm.request.body.raw);\r",
+                  "\r",
+                  "pm.test(\"Full name matches request\", function () {\r",
+                  "    pm.expect(profile.full_name).to.eql(requestData.full_name);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Phone matches request\", function () {\r",
+                  "    pm.expect(profile.phone_number).to.eql(requestData.phone_number);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 6. SECURITY =====================\r",
+                  "pm.test(\"No password leaked\", function () {\r",
+                  "    pm.expect(profile.password).to.be.undefined;\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 7. BUSINESS LOGIC =====================\r",
+                  "pm.test(\"User ID exists\", function () {\r",
+                  "    pm.expect(profile.user_id).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 8. SAVE DATA (FIX CHÍNH) =====================\r",
+                  "pm.environment.set(\"phone_number\", profile.phone_number);\r",
+                  "pm.environment.set(\"vin_number\", profile.vin_number);\r",
+                  "\r",
+                  "//  lưu user_id đúng\r",
+                  "pm.environment.set(\"user_id\", profile.user_id);\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 9. PERFORMANCE =====================\r",
+                  "pm.test(\"Response time < 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 10. CONTENT TYPE =====================\r",
+                  "pm.test(\"Content-Type is JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 11. DEBUG =====================\r",
+                  "console.log(\"FULL RESPONSE:\", jsonData);\r",
+                  "console.log(\"PROFILE:\", profile);\r",
+                  "console.log(\"Saved user_id:\", pm.environment.get(\"user_id\"));\r",
+                  "console.log(\"Token used:\", pm.environment.get(\"token\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDA3OTU5MCwianRpIjoiMjBlNTVlNmYtNjFhZC00NDJlLWFkNDItYmU0MTYzODgzODg5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjkiLCJuYmYiOjE3NzQwNzk1OTAsImNzcmYiOiI5NDAzMTdkZC00ZWJmLTRkOGQtOWYyZi1mMTllNjliYzgwMDYiLCJleHAiOjE3NzQ2ODQzOTAsInJvbGUiOiJ1c2VyIn0.W3SjyLukymzS2esL-Ejmg6Sw8ZQifYkpVoFNjRC24OI",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"full_name\": \"Huynh Thi Thanh Tam\",\r\n  \"phone_number\": \"0925251111\",\r\n  \"address\": \"Nha Trang City\",\r\n  \"bio\": \"Test bio\",\r\n  \"vehicle_model\": \"VinFast VF9\",\r\n  \"vin_number\": \"VF3672635\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE PROFILE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// ===================== STATUS =====================\r",
+                  "pm.test(\"Status is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== PARSE =====================\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "\r",
+                  "// ===================== RESPONSE =====================\r",
+                  "pm.test(\"Delete success message\", function () {\r",
+                  "    pm.expect(jsonData.message.toLowerCase()).to.include(\"delete\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== VERIFY DELETE =====================\r",
+                  "// Sau delete → profile không còn\r",
+                  "// (dùng GET profile test tiếp)\r",
+                  "\r",
+                  "\r",
+                  "// ===================== PERFORMANCE =====================\r",
+                  "pm.test(\"Response time < 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDA3OTU5MCwianRpIjoiMjBlNTVlNmYtNjFhZC00NDJlLWFkNDItYmU0MTYzODgzODg5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjkiLCJuYmYiOjE3NzQwNzk1OTAsImNzcmYiOiI5NDAzMTdkZC00ZWJmLTRkOGQtOWYyZi1mMTllNjliYzgwMDYiLCJleHAiOjE3NzQ2ODQzOTAsInJvbGUiOiJ1c2VyIn0.W3SjyLukymzS2esL-Ejmg6Sw8ZQifYkpVoFNjRC24OI",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"full_name\": \"Huynh Thi Thanh Tam\",\r\n  \"phone_number\": \"0925251111\",\r\n  \"address\": \"Nha Trang City\",\r\n  \"bio\": \"Test bio\",\r\n  \"vehicle_model\": \"VinFast VF9\",\r\n  \"vin_number\": \"VF3672635\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET MY PROFILE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Status\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// Parse\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "// Validate structure (static testing)\r",
+                  "pm.test(\"Profile has required fields\", function () {\r",
+                  "    pm.expect(jsonData).to.have.property(\"email\");\r",
+                  "});\r",
+                  "\r",
+                  "// Validate data (dynamic)\r",
+                  "pm.test(\"Correct user email\", function () {\r",
+                  "    pm.expect(jsonData.email).to.eql(pm.environment.get(\"user_email\"));\r",
+                  "});\r",
+                  "\r",
+                  "// Security\r",
+                  "pm.test(\"Password not returned\", function () {\r",
+                  "    pm.expect(jsonData.password).to.be.undefined;\r",
+                  "});\r",
+                  "\r",
+                  "// Performance\r",
+                  "pm.test(\"Response time < 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE MY PROFILE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Update success\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "// Validate updated fields\r",
+                  "pm.test(\"Phone updated correctly\", function () {\r",
+                  "    pm.expect(jsonData.phone).to.eql(\"0123456789\");\r",
+                  "});\r",
+                  "\r",
+                  "// Static validation\r",
+                  "pm.test(\"Name exists\", function () {\r",
+                  "    pm.expect(jsonData).to.have.property(\"name\");\r",
+                  "});\r",
+                  "\r",
+                  "// Dynamic test\r",
+                  "pm.test(\"Email unchanged\", function () {\r",
+                  "    pm.expect(jsonData.email).to.eql(pm.environment.get(\"user_email\"));\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"full_name\": \"Nguyen Huyen Tram\",\r\n  \"phone_number\": \"0702082511\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET PROFILE DETAILS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/profile-details",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile-details"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
           }
         },
-        "url": {
-          "raw": "http://localhost:5000/api/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "5000",
-          "path": [
-            "api",
-            "login"
-          ]
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "REGISTER",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n \"email\": \"test1@gmail.com\",\r\n \"username\": \"test1\",\r\n \"password\": \"1234561\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "Auth",
+      "item": [
+        {
+          "name": "REGISTER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// ===================== 1. STATUS CODE =====================\r",
+                  "// Kiểm tra request thành công (201 hoặc 200 tùy backend)\r",
+                  "pm.test(\"Status code is 201 or 200\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 2. PARSE RESPONSE =====================\r",
+                  "let jsonData;\r",
+                  "try {\r",
+                  "    jsonData = pm.response.json();\r",
+                  "} catch (e) {\r",
+                  "    pm.test(\"Response is valid JSON\", function () {\r",
+                  "        throw new Error(\"Response is not JSON\");\r",
+                  "    });\r",
+                  "}\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 3. STRUCTURE VALIDATION (STATIC TESTING) =====================\r",
+                  "// Kiểm tra response có field user\r",
+                  "pm.test(\"Response has user object\", function () {\r",
+                  "    pm.expect(jsonData).to.have.property(\"user\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra user có email\r",
+                  "pm.test(\"User contains email\", function () {\r",
+                  "    pm.expect(jsonData.user).to.have.property(\"email\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 4. DATA VALIDATION =====================\r",
+                  "// Kiểm tra email đúng với request gửi lên\r",
+                  "pm.test(\"Email matches request\", function () {\r",
+                  "    let requestData = JSON.parse(pm.request.body.raw);\r",
+                  "    pm.expect(jsonData.user.email).to.eql(requestData.email);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 5. SECURITY TEST =====================\r",
+                  "// Đảm bảo không trả về password (bảo mật)\r",
+                  "pm.test(\"Password is not returned\", function () {\r",
+                  "    pm.expect(jsonData.user.password).to.be.undefined;\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 6. BUSINESS LOGIC TEST =====================\r",
+                  "// Kiểm tra user_id tồn tại (nếu backend có)\r",
+                  "pm.test(\"User ID exists\", function () {\r",
+                  "    pm.expect(jsonData.user.id || jsonData.user.user_id).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 7. SAVE DATA (DYNAMIC TESTING) =====================\r",
+                  "// Lưu email để dùng cho login sau\r",
+                  "pm.environment.set(\"user_email\", jsonData.user.email);\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 8. PERFORMANCE TEST =====================\r",
+                  "// Kiểm tra tốc độ phản hồi < 2s\r",
+                  "pm.test(\"Response time is less than 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 9. CONTENT-TYPE CHECK =====================\r",
+                  "pm.test(\"Content-Type is application/json\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== 10. DEBUG (KHI CẦN) =====================\r",
+                  "// In ra console để debug nếu lỗi\r",
+                  "console.log(\"Response:\", jsonData);\r",
+                  "\r",
+                  "// login auto \r",
+                  "pm.environment.set(\"user_email\", jsonData.user.email);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n \"email\": \"thanhtam108@gmail.com\",\r\n \"username\":\"Tamthanh08\",\r\n \"password\": \"tramnh3098\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SEND-OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "\r",
+                  "let res = pm.response.json();\r",
+                  "\r",
+                  "if (res.otp) {\r",
+                  "    pm.environment.set(\"otp\", res.otp);\r",
+                  "    console.log(\"OTP:\", res.otp);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "let token = pm.environment.get(\"token\");\r",
+                  "\r",
+                  "pm.test(\"Token phải tồn tại\", function () {\r",
+                  "    pm.expect(token).to.not.be.undefined;\r",
+                  "});\r",
+                  "console.log(\"TOKEN:\", pm.environment.get(\"token\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDQ2NDAwMiwianRpIjoiNTIwNzVkN2YtYjBlZS00MWQ1LWIwM2QtMzQ4MGJjZjg3MWMxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjI2IiwibmJmIjoxNzc0NDY0MDAyLCJjc3JmIjoiMjJkZjg0YjQtY2RjNi00N2FlLWI2MmItNzJkZTQ5ZDgwNzExIiwiZXhwIjoxNzc1MDY4ODAyLCJyb2xlIjoidXNlciJ9.Ny77hVJvEuXaKMEnDYLLt4cytBdTSgoAAD-km4fxh5M",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message\": \"OTP sent (test mode)\",\r\n  \"otp\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/send-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "send-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RESET PW",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let res = pm.response.json();\r",
+                  "\r",
+                  "// status\r",
+                  "pm.test(\"Status is 200\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+                  "});\r",
+                  "\r",
+                  "// check message hoặc error\r",
+                  "pm.test(\"Có message hoặc error\", function () {\r",
+                  "    pm.expect(res).to.have.any.keys(\"message\", \"error\");\r",
+                  "});\r",
+                  "\r",
+                  "// nếu success thì check message\r",
+                  "if (res.message) {\r",
+                  "    pm.test(\"Reset success message\", function () {\r",
+                  "        pm.expect(res.message.toLowerCase()).to.include(\"thành công\");\r",
+                  "    });\r",
+                  "}\r",
+                  "\r",
+                  "// nếu lỗi thì log\r",
+                  "if (res.error) {\r",
+                  "    console.log(\"ERROR:\", res.error);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"thanhtam108@gmail.com\",\r\n  \"otp\": 291147,\r\n  \"new_password\": \"hyntrem\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LOGIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let res = pm.response.json();\r",
+                  "\r",
+                  "// Lưu token CHUẨN\r",
+                  "pm.environment.set(\"token\", res.access_token);\r",
+                  "\r",
+                  "console.log(\"NEW TOKEN:\", res.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n \"email_username\": \"thanhtam108@gmail.com\",\r\n \"password\": \"tramnh3098\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
           }
         },
-        "url": {
-          "raw": "http://localhost:5000/api/register",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "5000",
-          "path": [
-            "api",
-            "register"
-          ]
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "SEND-OTP",
-      "request": {
-        "auth": {
-          "type": "bearer"
-        },
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email\": \"admin@gmail.com\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "Account",
+      "item": [
+        {
+          "name": "Update Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// ===================== STATUS =====================\r",
+                  "pm.test(\"Status is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);  // Kiểm tra status code là 200 (thành công)\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== PARSE =====================\r",
+                  "let jsonData;\r",
+                  "try {\r",
+                  "    jsonData = pm.response.json();  // Parse phản hồi JSON\r",
+                  "} catch (e) {\r",
+                  "    throw new Error(\"Response không phải JSON hợp lệ\");  // Nếu phản hồi không phải JSON hợp lệ\r",
+                  "}\r",
+                  "\r",
+                  "\r",
+                  "// ===================== STRUCTURE =====================\r",
+                  "pm.test(\"Has user object\", function () {\r",
+                  "    pm.expect(jsonData).to.have.property(\"user\");  // Kiểm tra phản hồi có chứa đối tượng \"user\"\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== VALIDATE DATA =====================\r",
+                  "let req = JSON.parse(pm.request.body.raw);  // Parse body request để lấy dữ liệu gửi lên\r",
+                  "\r",
+                  "pm.test(\"Username updated\", function () {\r",
+                  "    pm.expect(jsonData.user.username).to.eql(req.username);  // Kiểm tra username trong response có khớp với dữ liệu gửi lên\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===================== SAVE USER =====================\r",
+                  "pm.environment.set(\"user_id\", jsonData.user.user_id);  // Lưu user_id vào môi trường\r",
+                  "pm.environment.set(\"username\", jsonData.user.username);  // Lưu username vào môi trường\r",
+                  "\r",
+                  "\r",
+                  "// ===================== PERFORMANCE =====================\r",
+                  "pm.test(\"Response time < 2000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);  // Kiểm tra thời gian phản hồi < 2000ms\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDQ2NDAwMiwianRpIjoiNTIwNzVkN2YtYjBlZS00MWQ1LWIwM2QtMzQ4MGJjZjg3MWMxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjI2IiwibmJmIjoxNzc0NDY0MDAyLCJjc3JmIjoiMjJkZjg0YjQtY2RjNi00N2FlLWI2MmItNzJkZTQ5ZDgwNzExIiwiZXhwIjoxNzc1MDY4ODAyLCJyb2xlIjoidXNlciJ9.Ny77hVJvEuXaKMEnDYLLt4cytBdTSgoAAD-km4fxh5M",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"thanhtam_new\",\r\n  \"email\": \"tamthanh_new@email.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/account",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "account"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Delete Success\", function () {\r",
+                  "    pm.expect(res.message.toLowerCase()).to.include(\"xóa\");\r",
+                  "});\r",
+                  "// Xóa token luôn (user đã bị xóa)\r",
+                  "pm.environment.unset(\"token\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDQ2MDc5MywianRpIjoiYWExMGZjZjUtMjgwZi00MzExLTlmYTItN2VjMWFjYThjYjViIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzQ0NjA3OTMsImNzcmYiOiI4ODk5NGQzZS01Yzg2LTQ4YjItYjMxZS00Nzc1OGM3ZTljN2QiLCJleHAiOjE3NzUwNjU1OTMsInJvbGUiOiJhZG1pbiJ9.xl_PEq7i37yPX7if4nZBCC9ICvVWkNO_o7wnlVxKxXE",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"thanhtam\",\r\n  \"email\": \"tamthanh18@email.com\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/account",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "account"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
           }
         },
-        "url": {
-          "raw": "http://localhost:5000/api/send-otp",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "5000",
-          "path": [
-            "api",
-            "send-otp"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "RESET PW",
-      "request": {
-        "auth": {
-          "type": "bearer"
-        },
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email\": \"admin@gmail.com\",\r\n  \"otp\": \"123456\",\r\n  \"new_password\": \"newpassword123\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
           }
-        },
-        "url": {
-          "raw": "http://localhost:5000/api/reset-password",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "5000",
-          "path": [
-            "api",
-            "reset-password"
-          ]
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "GET PROFILE",
-      "request": {
-        "auth": {
-          "type": "bearer"
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:5000/api/profile",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "5000",
-          "path": [
-            "api",
-            "profile"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "UPDATE PROFILE",
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"full_name\": \"Nguyen Huyen Tram\",\r\n  \"phone_number\": \"0901234567\",\r\n  \"address\": \"Ho Chi Minh City\",\r\n  \"bio\": \"IT Student\",\r\n  \"avatar_url\": \"https://example.com/avatar.png\",\r\n  \"vehicle_model\": \"VinFast VF8\",\r\n  \"vin_number\": \"VF812345678\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get all user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDUyMzI4MSwianRpIjoiYjkxOGE4MzMtYjI4OC00YWI1LTliYjItNzQwODRjZTI0NzZmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjI4IiwibmJmIjoxNzc0NTIzMjgxLCJjc3JmIjoiOWVjYzA5MWUtMjdmMy00ZGYzLTgxOTgtNWU2ZWMwNjIxYmNhIiwiZXhwIjoxNzc1MTI4MDgxLCJyb2xlIjoiYWRtaW4ifQ.5nhZQ6YM6tk_fg0swSxgacBFHZm3So9a-9tiWTZUCg4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:5000/api/profile",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "5000",
-          "path": [
-            "api",
-            "profile"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "GET Profile Details",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"subject\": \"1\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+          "name": "CREATE USER ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Created\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "if (jsonData.user_id) {\r",
+                  "    pm.environment.set(\"new_user_id\", jsonData.user_id);\r",
+                  "    console.log(\"NEW USER ID:\", jsonData.user_id);\r",
+                  "} else {\r",
+                  "    console.log(\"❌ Không tìm thấy user_id\", jsonData);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:5000/api/profile-details",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "5000",
-          "path": [
-            "api",
-            "profile-details"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "UPDATE ACCOUNT",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
-    },
-    {
-      "name": "DELETE USER by id",
-      "request": {
-        "method": "GET",
-        "header": []
-      },
-      "response": []
-    },
-    {
-      "name": "Admin Create User",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email\": \"user2@gmail.com\",\r\n  \"username\": \"user2\",\r\n  \"password\": \"123456\",\r\n  \"role\": \"user\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDUyMzI4MSwianRpIjoiYjkxOGE4MzMtYjI4OC00YWI1LTliYjItNzQwODRjZTI0NzZmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjI4IiwibmJmIjoxNzc0NTIzMjgxLCJjc3JmIjoiOWVjYzA5MWUtMjdmMy00ZGYzLTgxOTgtNWU2ZWMwNjIxYmNhIiwiZXhwIjoxNzc1MTI4MDgxLCJyb2xlIjoiYWRtaW4ifQ.5nhZQ6YM6tk_fg0swSxgacBFHZm3So9a-9tiWTZUCg4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"testTram1125@gmail.com\",\r\n  \"username\": \"testTram1125\",\r\n  \"password\": \"78912\",\r\n  \"role\": \"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:5000/api/admin/users",
-          "protocol": "http",
-          "host": [
-            "localhost"
+        {
+          "name": "DELETE USER ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deleted\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
           ],
-          "port": "5000",
-          "path": [
-            "api",
-            "admin",
-            "users"
-          ]
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{new_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{new_user_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TOGGLE LOCK USER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Toggle success\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"User has status\", function () {\r",
+                  "    pm.expect(jsonData).to.have.property(\"status\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NDUyMzI4MSwianRpIjoiYjkxOGE4MzMtYjI4OC00YWI1LTliYjItNzQwODRjZTI0NzZmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjI4IiwibmJmIjoxNzc0NTIzMjgxLCJjc3JmIjoiOWVjYzA5MWUtMjdmMy00ZGYzLTgxOTgtNWU2ZWMwNjIxYmNhIiwiZXhwIjoxNzc1MTI4MDgxLCJyb2xlIjoiYWRtaW4ifQ.5nhZQ6YM6tk_fg0swSxgacBFHZm3So9a-9tiWTZUCg4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/{{new_user_id}}/toggle-lock",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "{{new_user_id}}",
+                "toggle-lock"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
     }
   ]
 }
