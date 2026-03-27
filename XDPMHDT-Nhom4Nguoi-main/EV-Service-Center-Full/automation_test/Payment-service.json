@@ -8,34 +8,43 @@
   },
   "item": [
     {
-      "name": "Create Payment",
+      "name": "Create Payment - Success",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code hợp lệ\", function () {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([201, 400]);\r",
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
               "});\r",
               "\r",
-              "const jsonData = pm.response.json();\r",
+              "const res = pm.response.json();\r",
               "\r",
-              "if (pm.response.code === 201) {\r",
-              "    pm.test(\"Create payment thành công\", function () {\r",
-              "        pm.expect(jsonData.id).to.exist;\r",
-              "        pm.expect(jsonData.invoice_id).to.exist;\r",
-              "        pm.expect(jsonData.user_id).to.exist;\r",
-              "        pm.expect(jsonData.amount).to.exist;\r",
-              "        pm.expect(jsonData.method).to.exist;\r",
-              "        pm.expect(jsonData.status).to.exist;\r",
-              "        pm.expect(jsonData.pg_transaction_id).to.exist;\r",
-              "        pm.expect(jsonData.payment_data).to.exist;\r",
-              "    });\r",
+              "pm.test(\"Response has required fields\", function () {\r",
+              "    pm.expect(res.id).to.exist;\r",
+              "    pm.expect(res.invoice_id).to.exist;\r",
+              "    pm.expect(res.user_id).to.exist;\r",
+              "    pm.expect(res.amount).to.exist;\r",
+              "    pm.expect(res.method).to.exist;\r",
+              "    pm.expect(res.pg_transaction_id).to.exist;\r",
+              "    pm.expect(res.status).to.exist;\r",
+              "});\r",
               "\r",
-              "    pm.environment.set(\"payment_transaction_id\", jsonData.id);\r",
-              "    pm.environment.set(\"pg_transaction_id\", jsonData.pg_transaction_id);\r",
-              "    pm.environment.set(\"current_payment_status\", jsonData.status);\r",
-              "}"
+              "pm.test(\"Payment status is pending\", function () {\r",
+              "    pm.expect(String(res.status)).to.include(\"pending\");\r",
+              "});\r",
+              "\r",
+              "pm.environment.set(\"payment_id\", res.id);\r",
+              "pm.environment.set(\"pg_transaction_id\", res.pg_transaction_id);\r",
+              "pm.environment.set(\"payment_status\", res.status);\r",
+              "\r",
+              "if (res.payment_data) {\r",
+              "    pm.collectionVariables.set(\"payment_data\", res.payment_data);\r",
+              "}\r",
+              "\r",
+              "pm.test(\"pg_transaction_id saved\", function () {\r",
+              "    pm.expect(pm.environment.get(\"pg_transaction_id\")).to.exist;\r",
+              "});"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -70,29 +79,25 @@
       "response": []
     },
     {
-      "name": "Webhook Payment",
+      "name": "Create Payment - Invalid invoice_id",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code hợp lệ\", function () {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
               "});\r",
               "\r",
-              "const jsonData = pm.response.json();\r",
+              "const res = pm.response.json();\r",
               "\r",
-              "if (pm.response.code === 200) {\r",
-              "    pm.test(\"Webhook xử lý thành công\", function () {\r",
-              "        pm.expect(jsonData.message).to.eql(\"Webhook processed successfully\");\r",
-              "    });\r",
+              "pm.test(\"Has error message\", function () {\r",
+              "    pm.expect(res.error).to.exist;\r",
+              "});\r",
               "\r",
-              "    pm.environment.set(\"current_payment_status\", \"success\");\r",
-              "} else {\r",
-              "    console.log(\"Webhook failed:\", jsonData);\r",
-              "}\r",
-              "\r",
-              "pm.environment.set(\"current_payment_status\", \"success\");"
+              "pm.test(\"Error mentions invoice\", function () {\r",
+              "    pm.expect(res.error.toLowerCase()).to.include(\"invoice\");\r",
+              "});"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -102,13 +107,113 @@
       ],
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"invoice_id\": {{invalid_invoice_id}},\r\n  \"method\": \"{{payment_method}}\",\r\n  \"user_id\": {{user_id}},\r\n  \"amount\": 1000\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
           }
-        ],
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/create",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Payment - Missing amount",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Has error message\", function () {\r",
+              "    pm.expect(res.error).to.exist;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error mentions missing required fields\", function () {\r",
+              "    pm.expect(res.error.toLowerCase()).to.include(\"missing\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"invoice_id\": {{invoice_id}},\r\n  \"method\": \"{{payment_method}}\",\r\n  \"user_id\": {{user_id}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/create",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Webhook - Success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Webhook processed successfully\", function () {\r",
+              "    pm.expect(res.message).to.exist;\r",
+              "    pm.expect(res.message.toLowerCase()).to.include(\"webhook\");\r",
+              "});\r",
+              "\r",
+              "pm.environment.set(\"payment_status\", \"success\");\r",
+              "pm.collectionVariables.set(\"last_webhook_status\", \"success\");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
         "body": {
           "mode": "raw",
           "raw": "{\r\n  \"pg_transaction_id\": \"{{pg_transaction_id}}\",\r\n  \"status\": \"success\"\r\n}",
@@ -133,33 +238,25 @@
       "response": []
     },
     {
-      "name": "User - Payment History My",
+      "name": "Webhook - sai data",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
               "});\r",
               "\r",
               "const res = pm.response.json();\r",
               "\r",
-              "pm.test(\"Response is array\", function () {\r",
-              "    pm.expect(res).to.be.an(\"array\");\r",
+              "pm.test(\"Has error message\", function () {\r",
+              "    pm.expect(res.error).to.exist;\r",
               "});\r",
               "\r",
-              "if (res.length > 0) {\r",
-              "    pm.test(\"First payment has required fields\", function () {\r",
-              "        pm.expect(res[0]).to.have.property(\"id\");\r",
-              "        pm.expect(res[0]).to.have.property(\"invoice_id\");\r",
-              "        pm.expect(res[0]).to.have.property(\"user_id\");\r",
-              "        pm.expect(res[0]).to.have.property(\"amount\");\r",
-              "        pm.expect(res[0]).to.have.property(\"method\");\r",
-              "        pm.expect(res[0]).to.have.property(\"status\");\r",
-              "        pm.expect(res[0]).to.have.property(\"pg_transaction_id\");\r",
-              "    });\r",
-              "}"
+              "pm.test(\"Error mentions invalid status\", function () {\r",
+              "    pm.expect(res.error.toLowerCase()).to.include(\"không hợp lệ\");\r",
+              "});"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -168,35 +265,86 @@
         }
       ],
       "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{token}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "GET",
+        "method": "POST",
         "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"pg_transaction_id\": \"{{pg_transaction_id}}\",\r\n  \"status\": \"done\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
         "url": {
-          "raw": "{{base_url_payment}}/api/payments/history/my",
+          "raw": "{{base_url_payment}}/api/payments/webhook",
           "host": [
             "{{base_url_payment}}"
           ],
           "path": [
             "api",
             "payments",
-            "history",
-            "my"
+            "webhook"
           ]
         }
       },
       "response": []
     },
     {
-      "name": "Admin - Payment History All",
+      "name": "Webhook - thiếu field",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Has error message\", function () {\r",
+              "    pm.expect(res.error).to.exist;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error mentions missing required fields\", function () {\r",
+              "    pm.expect(res.error.toLowerCase()).to.include(\"missing\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"status\": \"success\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/webhook",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "webhook"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Payment History All",
       "event": [
         {
           "listen": "test",
@@ -213,12 +361,11 @@
               "});\r",
               "\r",
               "if (res.length > 0) {\r",
-              "    pm.test(\"First payment has required fields\", function () {\r",
+              "    pm.test(\"First item has expected fields\", function () {\r",
               "        pm.expect(res[0]).to.have.property(\"id\");\r",
               "        pm.expect(res[0]).to.have.property(\"invoice_id\");\r",
               "        pm.expect(res[0]).to.have.property(\"user_id\");\r",
               "        pm.expect(res[0]).to.have.property(\"amount\");\r",
-              "        pm.expect(res[0]).to.have.property(\"method\");\r",
               "        pm.expect(res[0]).to.have.property(\"status\");\r",
               "    });\r",
               "}"
@@ -256,6 +403,201 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Get Payment History My",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"My payment history contains current invoice\", function () {\r",
+              "    const found = res.some(p => String(p.invoice_id) === String(pm.environment.get(\"invoice_id\")));\r",
+              "    pm.expect(found).to.eql(true);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/history/my",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "history",
+            "my"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Payment - Wrong user_id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Has error message\", function () {\r",
+              "    pm.expect(res.error).to.exist;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"invoice_id\": {{invoice_id}},\r\n  \"method\": \"{{payment_method}}\",\r\n  \"user_id\": 999999,\r\n  \"amount\": {{payment_amount}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/create",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Payment - Wrong amount",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});\r",
+              "\r",
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Has error message\", function () {\r",
+              "    pm.expect(res.error).to.exist;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Error mentions amount or mismatch\", function () {\r",
+              "    pm.expect(JSON.stringify(res).toLowerCase()).to.satisfy(function (txt) {\r",
+              "        return txt.includes(\"amount\") || txt.includes(\"khớp\") || txt.includes(\"invoice\");\r",
+              "    });\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"invoice_id\": {{invoice_id}},\r\n  \"method\": \"{{payment_method}}\",\r\n  \"user_id\": {{user_id}},\r\n  \"amount\": 1000\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/create",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Webhook - Failed",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 or 400\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"pg_transaction_id\": \"{{pg_transaction_id}}\",\r\n  \"status\": \"failed\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_payment}}/api/payments/webhook",
+          "host": [
+            "{{base_url_payment}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "webhook"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": [
@@ -280,6 +622,16 @@
           ""
         ]
       }
+    }
+  ],
+  "variable": [
+    {
+      "key": "payment_data",
+      "value": ""
+    },
+    {
+      "key": "last_webhook_status",
+      "value": ""
     }
   ]
 }
