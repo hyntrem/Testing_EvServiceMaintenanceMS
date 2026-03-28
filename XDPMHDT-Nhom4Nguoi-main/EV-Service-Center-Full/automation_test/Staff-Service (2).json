@@ -2043,13 +2043,25 @@
                   "listen": "test",
                   "script": {
                     "exec": [
-                      "let res = pm.response.json();\r",
-                      "\r",
-                      "pm.test(\"Check respone status and success field\", () => {\r",
+                       "pm.test(\"Status code is 200\", function () {\r",
                       "    pm.response.to.have.status(200);\r",
-                      "    pm.expect(res.success).to.eql(true);\r",
-                      "    pm.expect(res.staff).to.be.an(\"array\");\r",
-                      "});"
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response has success true\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Response has staff array\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.staff).to.be.an(\"array\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Count matches staff length\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.count).to.eql(jsonData.staff.length);\r",
+                      "});\r",
+                      ""
                     ],
                     "type": "text/javascript",
                     "packages": {},
@@ -2081,12 +2093,20 @@
                   "listen": "test",
                   "script": {
                     "exec": [
-                      "let res = pm.response.json();\r",
-                      "\r",
-                      "pm.test(\"Get staff OK\", () => {\r",
+                      "pm.test(\"Status code is 200\", function () {\r",
                       "    pm.response.to.have.status(200);\r",
-                      "    pm.expect(res.staff.id.toString())\r",
-                      "      .to.eql(pm.environment.get(\"staff_id\").toString());\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Staff exists\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.success).to.eql(true);\r",
+                      "    pm.expect(jsonData.staff).to.be.an(\"object\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Staff has required fields\", function () {\r",
+                      "    const staff = pm.response.json().staff;\r",
+                      "    pm.expect(staff).to.have.property(\"id\");\r",
+                      "    pm.expect(staff).to.have.property(\"full_name\");\r",
                       "});"
                     ],
                     "type": "text/javascript",
@@ -2111,6 +2131,61 @@
                 }
               },
               "response": []
+            },
+             {
+              "name": "GetHealth",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Health check OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Service is healthy\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.status).to.eql(\"healthy\");\r",
+                      "});\r",
+                      "const schema = {\r",
+                      "    type: \"object\",\r",
+                      "    properties: {\r",
+                      "        success: { type: \"boolean\" },\r",
+                      "        service: { type: \"string\" },\r",
+                      "        status: { type: \"string\" } \r",
+                      "    },\r",
+                      "    required: [\"success\", \"service\", \"status\"]\r",
+                      "};\r",
+                      "\r",
+                      "pm.test(\"Schema is valid\", function () {\r",
+                      "    pm.response.to.have.jsonSchema(schema);\r",
+                      "});\r",
+                      "pm.test(\"Schema is valid\", function () {\r",
+                      "    pm.response.to.have.jsonSchema(schema);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{staff}}/internal/staff/health",
+                  "host": [
+                    "{{staff}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "staff",
+                    "health"
+                  ]
+                }
+              },
+              "response": []
             }
           ]
         },
@@ -2131,6 +2206,22 @@
                       "    pm.expect(res.success).to.eql(true);\r",
                       "    pm.expect(res.performance.staff_id.toString())\r",
                       "      .to.eql(pm.environment.get(\"staff_id\").toString());\r",
+                      "});\r",
+                      "const jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Có performance\", () => {\r",
+                      "    pm.expect(jsonData.performance).to.be.an(\"object\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Có field quan trọng\", () => {\r",
+                      "    const p = jsonData.performance;\r",
+                      "\r",
+                      "    pm.expect(p).to.include.all.keys(\r",
+                      "        \"staff_id\",\r",
+                      "        \"tasks_assigned\",\r",
+                      "        \"tasks_completed\",\r",
+                      "        \"tasks_cancelled\"\r",
+                      "    );\r",
                       "});"
                     ],
                     "type": "text/javascript",
