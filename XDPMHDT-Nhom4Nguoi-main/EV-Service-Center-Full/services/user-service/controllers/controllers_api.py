@@ -40,7 +40,13 @@ def serialize_profile(profile):
         "vehicle_model": getattr(profile, "vehicle_model", None),
         "vin_number": getattr(profile, "vin_number", None)
     }
-
+# --- User Decorator ---
+def auth_required(fn):
+    @wraps(fn)
+    def decorator(*args, **kwargs):
+        verify_jwt_in_request()
+        return fn(*args, **kwargs)
+    return decorator
 # --- Admin Decorator ---
 def admin_required():
     def wrapper(fn):
@@ -149,6 +155,7 @@ def send_otp():
             "details": str(e)
         }), 500
 @api_bp.route("/reset-password", methods=["POST"])
+@jwt_required()
 def reset_password():
     data = request.get_json()
     if not data or not all(k in data for k in ["email", "otp", "new_password"]):
@@ -193,24 +200,6 @@ def get_profile_details():
         return jsonify({"error": "Profile not found"}), 404
     return jsonify(serialize_profile(profile)), 200
 
-# --- Account Endpoints ---
-# --- Account Endpoints ---
-@api_bp.route("/account", methods=["PUT"])
-@jwt_required()
-def update_my_account():
-    current_user_id = get_jwt_identity()
-    user, error = UserLogic.update_user_by_member(current_user_id, request.json)
-    if error:
-        return jsonify({"error": error}), 400
-    return jsonify({"message": "Account updated", "user": serialize_user(user)}), 200
-@api_bp.route("/account", methods=["DELETE"])
-@jwt_required()
-def delete_my_account():
-    current_user_id = get_jwt_identity()
-    success, message = UserLogic.delete_user(current_user_id)
-    if not success:
-        return jsonify({"error": message}), 404
-    return jsonify({"message": message}), 200
 
 # --- Admin endpoints (commented for now) ---
 @api_bp.route("/admin/users", methods=["GET"])
