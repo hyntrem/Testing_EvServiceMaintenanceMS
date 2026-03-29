@@ -169,7 +169,6 @@ services:
         condition: service_started
     networks:
       - ev_network
-
   # ===================== INVENTORY SERVICE =====================
   inventory-service:
     build: ./services/inventory-service
@@ -201,6 +200,8 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
       - USER_SERVICE_URL=http://user-service:5000
+    ports:
+      - "8001:8001"
     expose:
       - "8001"
     depends_on:

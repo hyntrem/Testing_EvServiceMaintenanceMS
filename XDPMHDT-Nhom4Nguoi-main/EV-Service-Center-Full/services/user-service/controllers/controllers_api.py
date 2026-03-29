@@ -1,4 +1,4 @@
-# File: api_routes.py
+# File:controller_api.py
 from functools import wraps
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import (
@@ -40,7 +40,13 @@ def serialize_profile(profile):
         "vehicle_model": getattr(profile, "vehicle_model", None),
         "vin_number": getattr(profile, "vin_number", None)
     }
-
+# --- User Decorator ---
+def auth_required(fn):
+    @wraps(fn)
+    def decorator(*args, **kwargs):
+        verify_jwt_in_request()
+        return fn(*args, **kwargs)
+    return decorator
 # --- Admin Decorator ---
 def admin_required():
     def wrapper(fn):
@@ -54,8 +60,8 @@ def admin_required():
                 return jsonify(error="Admins only!"), 403
         return decorator
     return wrapper
-
-# --- JWT Callbacks ---
+    
+    #-- JWT Callbacks ---
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
     identity = jwt_data["sub"]
@@ -99,20 +105,57 @@ def login():
     access_token = create_access_token(identity=str(user.user_id))
     return jsonify(access_token=access_token)
 
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import jsonify
+from app import r
+from models.user import User
+import os
+import random
+
 @api_bp.route("/send-otp", methods=["POST"])
+@jwt_required()
 def send_otp():
-    email = request.json.get("email")
-    if not email:
-        return jsonify({"error": "Email is required"}), 400
-    success, message = UserLogic.send_reset_otp(email)
-    if not success:
-        return jsonify(error=message), 404
-    return jsonify(message=message), 200
+    try:
+        user_id = int(get_jwt_identity())
 
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
 
+        # 🔥 normalize email (RẤT QUAN TRỌNG)
+        email = user.email.strip().lower()
 
+        otp = str(random.randint(100000, 999999))
 
+        # ❗ BẮT BUỘC Redis phải tồn tại
+        if not r:
+            print("❌ Redis not connected")
+            return jsonify({"error": "Redis not connected"}), 500
+
+        # 🔥 lưu OTP
+        key = f"otp:{email}"
+        r.set(key, otp, ex=300)
+
+        print("✅ OTP SAVED:", key, otp)
+
+        if os.getenv("TEST_MODE", "true") == "true":
+            return jsonify({
+                "message": "OTP sent (test mode)",
+                "otp": otp
+            }), 200
+
+        return jsonify({
+            "message": "OTP sent to email"
+        }), 200
+
+    except Exception as e:
+        print("ERROR in /send-otp:", str(e))
+        return jsonify({
+            "error": "Internal server error",
+            "details": str(e)
+        }), 500
 @api_bp.route("/reset-password", methods=["POST"])
+@jwt_required()
 def reset_password():
     data = request.get_json()
     if not data or not all(k in data for k in ["email", "otp", "new_password"]):
@@ -157,24 +200,6 @@ def get_profile_details():
         return jsonify({"error": "Profile not found"}), 404
     return jsonify(serialize_profile(profile)), 200
 
-# --- Account Endpoints ---
-@api_bp.route("/account", methods=["PUT"])
-@jwt_required()
-def update_my_account():
-    current_user_id = get_jwt_identity()
-    user, error = UserLogic.update_user_by_member(current_user_id, request.json)
-    if error:
-        return jsonify({"error": error}), 400
-    return jsonify({"message": "Account updated", "user": serialize_user(user)}), 200
-
-@api_bp.route("/account", methods=["DELETE"])
-@jwt_required()
-def delete_my_account():
-    current_user_id = get_jwt_identity()
-    success, message = UserLogic.delete_user(current_user_id)
-    if not success:
-        return jsonify({"error": message}), 404
-    return jsonify({"message": message}), 200
 
 # --- Admin endpoints (commented for now) ---
 @api_bp.route("/admin/users", methods=["GET"])
@@ -235,3 +260,58 @@ def create_user_by_admin():
     
     # 201 (Created) khi tạo thành công
     return jsonify(serialize_user(user)), 201
+
+@api_bp.route("/profile", methods=["POST"])
+@jwt_required()
+def create_profile():
+    from flask_jwt_extended import get_jwt_identity
+
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    # Validate
+    if not data:
+        return jsonify({"error": "Request body is required"}), 400
+
+    # Check profile tồn tại
+    existing_profile = ProfileLogic.get_profile_by_user_id(user_id)
+    if existing_profile and existing_profile.full_name:
+        return jsonify({"error": "Profile already exists"}), 409
+
+    # GỌI SERVICE (QUAN TRỌNG)
+    profile, error = ProfileLogic.create_profile(user_id, data)
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    return jsonify({
+        "message": "Profile created successfully",
+        "profile": serialize_profile(profile)
+    }), 201
+
+@api_bp.route("/profile", methods=["DELETE"])
+@jwt_required()
+def delete_profile():
+    from flask_jwt_extended import get_jwt_identity
+    from app import db
+
+    user_id = get_jwt_identity()
+
+    profile = ProfileLogic.get_profile_by_user_id(user_id)
+
+    if not profile:
+        return jsonify({"error": "Profile not found"}), 404
+
+    try:
+        db.session.delete(profile)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Profile deleted successfully"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "error": str(e)
+        }), 500
