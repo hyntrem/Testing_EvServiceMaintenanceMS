@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
 
 # Load environment variables từ .env trong thư mục service
 load_dotenv()
@@ -23,6 +24,7 @@ def create_app():
     # Lấy DATABASE_URL từ file .env của service
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "super-secret-key")
 
     # Internal Service Token cho API nội bộ
     internal_token = os.getenv("INTERNAL_SERVICE_TOKEN")
@@ -31,6 +33,7 @@ def create_app():
 
     # ===== KHỞI TẠO EXTENSIONS =====
     db.init_app(app)
+    jwt = JWTManager(app)
     # Cấu hình migration riêng cho Inventory Service
     migrate.init_app(app, db, directory='migrations', version_table='alembic_version_inventory')
 

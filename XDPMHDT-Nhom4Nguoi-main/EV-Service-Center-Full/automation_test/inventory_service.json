@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "60db97e4-4fcb-423f-91ea-d3a6d0067a81",
+    "_postman_id": "cf638ac4-77a5-4a77-a5c6-80b2e5f14895",
     "name": "Inventory_Service",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53361054",
-    "_collection_link": "https://go.postman.co/collection/53361054-60db97e4-4fcb-423f-91ea-d3a6d0067a81?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/53361054-cf638ac4-77a5-4a77-a5c6-80b2e5f14895?source=collection_link"
   },
   "item": [
     {
@@ -61,7 +61,7 @@
       "name": "Create Item",
       "item": [
         {
-          "name": "Missing name",
+          "name": "Create Missing Name",
           "event": [
             {
               "listen": "test",
@@ -126,7 +126,7 @@
           "response": []
         },
         {
-          "name": "Negative Quantity",
+          "name": "Create Negative Quantity",
           "event": [
             {
               "listen": "test",
@@ -187,7 +187,7 @@
           "response": []
         },
         {
-          "name": "Duplicate part_number",
+          "name": "Create Duplicate Part_number",
           "event": [
             {
               "listen": "test",
@@ -244,7 +244,7 @@
           "response": []
         },
         {
-          "name": "Create success",
+          "name": "Create Success",
           "event": [
             {
               "listen": "test",
@@ -317,7 +317,69 @@
           "response": []
         },
         {
-          "name": "Invalid data type",
+          "name": "Create No Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 (Unauthorized)\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    let jsonData = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(jsonData).to.be.an(\"object\");\r",
+                  "    pm.expect(jsonData).to.have.any.keys(\"msg\", \"error\", \"message\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message is about missing token\", function () {\r",
+                  "    let jsonData = pm.response.json();\r",
+                  "\r",
+                  "    // linh hoạt vì mỗi lib trả khác nhau\r",
+                  "    let msg = jsonData.msg || jsonData.error || jsonData.message;\r",
+                  "\r",
+                  "    pm.expect(msg.toLowerCase()).to.include(\"missing\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Brake Pad\",\r\n  \"part_number\": \"BP-{{timestamp}}\",\r\n  \"quantity\": 100,\r\n  \"price\": 10,\r\n  \"min_quantity\": 10,\r\n  \"center_id\": 4\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Invalid Data Type",
           "event": [
             {
               "listen": "test",
@@ -381,7 +443,140 @@
       "name": "Get Items",
       "item": [
         {
-          "name": "Get list",
+          "name": "Get Item By ID",
+          "item": [
+            {
+              "name": "Get  By ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1. Kiểm tra Status Code\r",
+                      "pm.test(\"Status 200\", () => {\r",
+                      "    pm.expect(pm.response.code).to.eql(200);\r",
+                      "});\r",
+                      "\r",
+                      "const res = pm.response.json();\r",
+                      "\r",
+                      "// 2. Kiểm tra cấu trúc Response & Kiểu dữ liệu (Đáp ứng Task 1)\r",
+                      "pm.test(\"Item has all required fields and correct types\", () => {\r",
+                      "    pm.expect(res).to.have.property(\"id\");\r",
+                      "    pm.expect(res).to.have.property(\"name\");\r",
+                      "    pm.expect(res).to.have.property(\"part_number\");\r",
+                      "    \r",
+                      "    // Kiểm tra phải là số để phục vụ tính toán Task 4\r",
+                      "    pm.expect(res.quantity).to.be.a('number'); \r",
+                      "    pm.expect(res.price).to.be.a('number');\r",
+                      "});\r",
+                      "\r",
+                      "// 3. LƯU BIẾN CHO TASK 3 & TASK 4\r",
+                      "if (res.id) {\r",
+                      "    pm.environment.set(\"item_id\", res.id);\r",
+                      "}\r",
+                      "\r",
+                      "if (res.quantity !== undefined) {\r",
+                      "    pm.environment.set(\"old_quantity\", res.quantity);\r",
+                      "    \r",
+                      "    // GIẢ LẬP FINANCE \r",
+                      "    // Thiết lập số lượng Finance muốn trừ (ví dụ mua 5 cái)\r",
+                      "    let order_amount = 5; \r",
+                      "    pm.environment.set(\"order_amount\", order_amount);\r",
+                      "    \r",
+                      "    // Tính toán số lượng dự kiến còn lại sau khi trừ thành công\r",
+                      "    pm.environment.set(\"expected_after_success\", res.quantity - order_amount);\r",
+                      "    \r",
+                      "    // Tính toán một con số gây thiếu hàng (ví dụ hiện có 5, đòi trừ 100)\r",
+                      "    pm.environment.set(\"over_order_amount\", res.quantity + 100);\r",
+                      "}\r",
+                      "\r",
+                      "// 4. Kiểm tra logic min_quantity \r",
+                      "if (res.quantity <= res.min_quantity) {\r",
+                      "    console.warn(`[WARNING] Item ${res.id} is LOW STOCK! (Qty: ${res.quantity} <= Min: ${res.min_quantity})`);\r",
+                      "}\r",
+                      "\r",
+                      "console.log(\"--- BẢN TIN INTEGRATION TASK 4 ---\");\r",
+                      "console.log(\"ID đang dùng:\", pm.environment.get(\"item_id\"));\r",
+                      "console.log(\"Tồn kho hiện tại:\", pm.environment.get(\"old_quantity\"));\r",
+                      "console.log(\"Số lượng Finance sẽ trừ:\", pm.environment.get(\"order_amount\"));"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+                  "host": [
+                    "{{base_url_inventory}}"
+                  ],
+                  "path": [
+                    "api",
+                    "inventory",
+                    "items",
+                    "{{item_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get ID not found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 404\", () => {\r",
+                      "    pm.expect(pm.response.code).to.eql(404);\r",
+                      "});\r",
+                      "\r",
+                      "const res = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Error exists\", () => {\r",
+                      "    pm.expect(res).to.have.property(\"error\");\r",
+                      "});\r",
+                      "\r",
+                      "console.log(\"Error:\", res.error);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url_inventory}}/api/inventory/items/999999",
+                  "host": [
+                    "{{base_url_inventory}}"
+                  ],
+                  "path": [
+                    "api",
+                    "inventory",
+                    "items",
+                    "999999"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get List",
           "event": [
             {
               "listen": "test",
@@ -405,6 +600,54 @@
                   "});\r",
                   "\r",
                   "console.log(\"List:\", res);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get List Empty (optional)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Kiểm tra mã trạng thái trả về là 200\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Kiểm tra dữ liệu trả về có phải là mảng rỗng hay không\r",
+                  "pm.test(\"Response is an array\", function () {\r",
+                  "    let jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.be.an(\"array\");\r",
+                  "});\r",
+                  "// 3. Kiểm tra thời gian phản hồi (tùy chọn - đảm bảo hệ thống phản hồi nhanh)\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -438,208 +681,6 @@
             }
           },
           "response": []
-        },
-        {
-          "name": "List empty (optional)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status is 200\", () => {\r",
-                  "    pm.response.to.have.status(200);\r",
-                  "});\r",
-                  "\r",
-                  "const res = pm.response.json();\r",
-                  "\r",
-                  "pm.test(\"Response is array\", () => {\r",
-                  "    pm.expect(res).to.be.an(\"array\");\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"List can be empty\", () => {\r",
-                  "    pm.expect(res.length).to.be.at.least(0);\r",
-                  "});"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url_inventory}}/api/inventory/items/49",
-              "host": [
-                "{{base_url_inventory}}"
-              ],
-              "path": [
-                "api",
-                "inventory",
-                "items",
-                "49"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Get Item By ID",
-      "item": [
-        {
-          "name": "Get by ID",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "// 1. Kiểm tra Status Code\r",
-                  "pm.test(\"Status 200\", () => {\r",
-                  "    pm.expect(pm.response.code).to.eql(200);\r",
-                  "});\r",
-                  "\r",
-                  "const res = pm.response.json();\r",
-                  "\r",
-                  "// 2. Kiểm tra cấu trúc Response & Kiểu dữ liệu (Đáp ứng Task 1)\r",
-                  "pm.test(\"Item has all required fields and correct types\", () => {\r",
-                  "    pm.expect(res).to.have.property(\"id\");\r",
-                  "    pm.expect(res).to.have.property(\"name\");\r",
-                  "    pm.expect(res).to.have.property(\"part_number\");\r",
-                  "    \r",
-                  "    // Kiểm tra phải là số để phục vụ tính toán Task 4\r",
-                  "    pm.expect(res.quantity).to.be.a('number'); \r",
-                  "    pm.expect(res.price).to.be.a('number');\r",
-                  "});\r",
-                  "\r",
-                  "// 3. LƯU BIẾN CHO TASK 3 & TASK 4\r",
-                  "if (res.id) {\r",
-                  "    pm.environment.set(\"item_id\", res.id);\r",
-                  "}\r",
-                  "\r",
-                  "if (res.quantity !== undefined) {\r",
-                  "    pm.environment.set(\"old_quantity\", res.quantity);\r",
-                  "    \r",
-                  "    // GIẢ LẬP FINANCE \r",
-                  "    // Thiết lập số lượng Finance muốn trừ (ví dụ mua 5 cái)\r",
-                  "    let order_amount = 5; \r",
-                  "    pm.environment.set(\"order_amount\", order_amount);\r",
-                  "    \r",
-                  "    // Tính toán số lượng dự kiến còn lại sau khi trừ thành công\r",
-                  "    pm.environment.set(\"expected_after_success\", res.quantity - order_amount);\r",
-                  "    \r",
-                  "    // Tính toán một con số gây thiếu hàng (ví dụ hiện có 5, đòi trừ 100)\r",
-                  "    pm.environment.set(\"over_order_amount\", res.quantity + 100);\r",
-                  "}\r",
-                  "\r",
-                  "// 4. Kiểm tra logic min_quantity \r",
-                  "if (res.quantity <= res.min_quantity) {\r",
-                  "    console.warn(`[WARNING] Item ${res.id} is LOW STOCK! (Qty: ${res.quantity} <= Min: ${res.min_quantity})`);\r",
-                  "}\r",
-                  "\r",
-                  "console.log(\"--- BẢN TIN INTEGRATION TASK 4 ---\");\r",
-                  "console.log(\"ID đang dùng:\", pm.environment.get(\"item_id\"));\r",
-                  "console.log(\"Tồn kho hiện tại:\", pm.environment.get(\"old_quantity\"));\r",
-                  "console.log(\"Số lượng Finance sẽ trừ:\", pm.environment.get(\"order_amount\"));"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
-              "host": [
-                "{{base_url_inventory}}"
-              ],
-              "path": [
-                "api",
-                "inventory",
-                "items",
-                "{{item_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "ID not found",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status 404\", () => {\r",
-                  "    pm.expect(pm.response.code).to.eql(404);\r",
-                  "});\r",
-                  "\r",
-                  "const res = pm.response.json();\r",
-                  "\r",
-                  "pm.test(\"Error exists\", () => {\r",
-                  "    pm.expect(res).to.have.property(\"error\");\r",
-                  "});\r",
-                  "\r",
-                  "console.log(\"Error:\", res.error);"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{access_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url_inventory}}/api/inventory/items/999999",
-              "host": [
-                "{{base_url_inventory}}"
-              ],
-              "path": [
-                "api",
-                "inventory",
-                "items",
-                "999999"
-              ]
-            }
-          },
-          "response": []
         }
       ]
     },
@@ -647,7 +688,7 @@
       "name": "Update items",
       "item": [
         {
-          "name": "Update success",
+          "name": "Update Success",
           "event": [
             {
               "listen": "test",
@@ -707,7 +748,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"quantity\": 5\r\n}",
+              "raw": "{\r\n  \"quantity\": 25\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -730,7 +771,7 @@
           "response": []
         },
         {
-          "name": "Update empty name",
+          "name": "Update Empty Name",
           "event": [
             {
               "listen": "test",
@@ -792,7 +833,7 @@
           "response": []
         },
         {
-          "name": "Update negative quantity",
+          "name": "Update Negative Quantity",
           "event": [
             {
               "listen": "test",
@@ -859,7 +900,7 @@
       "name": "Delete items",
       "item": [
         {
-          "name": "Delete success",
+          "name": "Delete Success",
           "event": [
             {
               "listen": "test",
@@ -906,7 +947,7 @@
           "response": []
         },
         {
-          "name": "Delete not foud",
+          "name": "Delete Not Foud",
           "event": [
             {
               "listen": "test",
@@ -1133,6 +1174,16 @@
             }
           ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [],
             "body": {
@@ -1189,18 +1240,15 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "// 1. Kỳ vọng Server trả về lỗi 400 (Bad Request) hoặc 422 (Unprocessable Entity)\r",
-                  "pm.test(\"Should FAIL: Server must reject insufficient stock\", () => {\r",
-                  "    // Lưu ý: Nếu Server trả về 200, test này sẽ ĐỎ (FAIL) -> Đây chính là cách bạn báo Bug.\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
+                  "pm.test(\"1. Phải trả về lỗi 400 hoặc 404 (Không đủ hàng)\", function () {\r",
+                  "    // Vì logic code Python của bạn trả về None, \"Không đủ hàng trong kho\"\r",
+                  "    // Nên thường mã lỗi sẽ là 400 (Bad Request)\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 404]);\r",
                   "});\r",
                   "\r",
-                  "// 2. Kiểm tra thông báo lỗi từ Server\r",
-                  "const res = pm.response.json();\r",
-                  "pm.test(\"Error message should mention 'quantity' or 'insufficient'\", () => {\r",
-                  "    if (pm.response.code !== 200) {\r",
-                  "        pm.expect(res.error.toLowerCase()).to.be.oneOf([\"quantity\", \"stock\", \"invalid\"]);\r",
-                  "    }\r",
+                  "pm.test(\"2. Tin nhắn báo lỗi chính xác\", function () {\r",
+                  "    var jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.error).to.eql(\"Không đủ hàng trong kho\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -1210,11 +1258,21 @@
             }
           ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"quantity\": {{insufficient_quantity}}\r\n}",
+              "raw": "{\r\n    \"id\": 66,\r\n    \"quantity_to_deduct\": 1000,\r\n    \"update_reason\": \"Test Over-deduction\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1310,10 +1368,20 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const res = pm.response.json();\r",
-                  "pm.test(\"Trừ kho dồn tích chính xác (100 -> 95 -> 85)\", () => {\r",
-                  "    pm.expect(res.item.quantity).to.eql(85);\r",
-                  "});"
+                  "var jsonData = pm.response.json();\r",
+                  "var deductQty = 10;\r",
+                  "\r",
+                  "// Lấy số lượng từ lần test trước (95) đã lưu trong old_qty\r",
+                  "var oldQty = pm.environment.get(\"old_qty\") || 95; \r",
+                  "var expected = oldQty - deductQty;\r",
+                  "\r",
+                  "pm.test(\"Kiểm tra khấu trừ đợt 2 chính xác\", function () {\r",
+                  "    pm.expect(jsonData.item.quantity).to.eql(expected, \r",
+                  "        `Sai logic liên tục: Lấy ${oldQty} trừ 10 phải ra ${expected} nhưng lại ra ${jsonData.item.quantity}`);\r",
+                  "});\r",
+                  "\r",
+                  "// Cập nhật lại biến môi trường cho vòng test tiếp theo\r",
+                  "pm.environment.set(\"old_qty\", jsonData.item.quantity);"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -1349,7 +1417,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\"quantity\": {{final_expected}}}",
+              "raw": "{\r\n    \"id\": 66,\r\n    \"quantity_to_deduct\": 10\r\n}",
               "options": {
                 "raw": {
                   "language": "json"

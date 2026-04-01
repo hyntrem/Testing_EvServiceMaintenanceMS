@@ -12,18 +12,25 @@ class MaintenanceService:
         url = f"{service_url}{endpoint}"
         headers = {"X-Internal-Token": internal_token}
         
+        print(f"🔍 DEBUG: Calling {method} {url}")
+        print(f"🔍 DEBUG: Internal Token: {internal_token}")
+        
         if not service_url or not internal_token:
              return None, "Lỗi cấu hình Service URL hoặc Internal Token."
 
         try:
-            response = requests.request(method, url, headers=headers, json=json_data)
+            response = requests.request(method, url, headers=headers, json=json_data, timeout=10)
+            
+            print(f"🔍 DEBUG: Response Status: {response.status_code}")
+            print(f"🔍 DEBUG: Response Body: {response.text[:200]}")
 
             if response.status_code == 200 or response.status_code == 201:
                 return response.json(), None
             else:
                 # Một số API trả về list trực tiếp hoặc dict không có key error
-                return None, f"Lỗi Service (HTTP {response.status_code})"
+                return None, f"Lỗi Service (HTTP {response.status_code}): {response.text[:100]}"
         except requests.exceptions.RequestException as e:
+            print(f"❌ DEBUG: Request Exception: {str(e)}")
             return None, f"Lỗi kết nối Service: {str(e)}"
 
     @staticmethod
@@ -56,14 +63,6 @@ class MaintenanceService:
 
     @staticmethod
     def create_task_from_booking(booking_id, technician_id):
-        existing_task = MaintenanceTask.query.filter_by(
-            booking_id=booking_id,
-            technician_id=technician_id
-        ).first()
-
-        if existing_task:
-            return None, "Kỹ thuật viên này đã được phân công cho Booking này rồi."
-
         booking_data, error = MaintenanceService._get_booking_details(booking_id)
         if error:
             return None, f"Lỗi khi lấy Booking: {error}"
@@ -255,3 +254,28 @@ class MaintenanceService:
         db.session.delete(item)
         db.session.commit()
         return True, None
+
+    # ============= Delete Task Method =============
+    @staticmethod
+    def delete_task(task_id):
+        """Delete a maintenance task - only allowed for pending tasks"""
+        task = MaintenanceTask.query.get(task_id)
+        if not task:
+            return None, "Không tìm thấy công việc bảo trì."
+        
+        # Only allow deletion of pending tasks
+        if task.status != 'pending':
+            return None, f"Không thể xóa công việc đang ở trạng thái '{task.status}'. Chỉ có thể xóa công việc 'pending'."
+        
+        try:
+            # Delete related checklist items first
+            MaintenanceChecklist.query.filter_by(task_id=task_id).delete()
+            # Delete related parts
+            TaskPart.query.filter_by(task_id=task_id).delete()
+            # Delete the task
+            db.session.delete(task)
+            db.session.commit()
+            return True, None
+        except Exception as e:
+            db.session.rollback()
+            return None, f"Lỗi khi xóa công việc: {str(e)}"
