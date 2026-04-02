@@ -1,846 +1,1545 @@
 {
   "info": {
-    "_postman_id": "60db97e4-4fcb-423f-91ea-d3a6d0067a81",
+    "_postman_id": "cf638ac4-77a5-4a77-a5c6-80b2e5f14895",
     "name": "Inventory_Service",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53361054",
-    "_collection_link": "https://go.postman.co/collection/53361054-60db97e4-4fcb-423f-91ea-d3a6d0067a81?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/53361054-cf638ac4-77a5-4a77-a5c6-80b2e5f14895?source=collection_link"
   },
   "item": [
     {
-      "name": "GET Inventory Item",
-      "event": [
+      "name": "Auth",
+      "item": [
         {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", () => {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});\r",
-              "\r",
-              "const res = pm.response.json();\r",
-              "const data = res.data || res.items || res;\r",
-              "\r",
-              "pm.test(\"Response is array\", () => {\r",
-              "    pm.expect(data).to.be.an(\"array\");\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Each item has required fields\", () => {\r",
-              "    if (data.length > 0) {\r",
-              "        const item = data[0];\r",
-              "\r",
-              "        pm.expect(item).to.have.property(\"center_id\");\r",
-              "        pm.expect(item).to.have.property(\"name\");\r",
-              "        pm.expect(item).to.have.property(\"quantity\");\r",
-              "    }\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items",
-          "host": [
-            "{{url_base}}"
-          ],
-          "path": [
-            "api",
-            "inventory",
-            "items"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "GET Inventory - Performance",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Response time < 2s\", () => {\r",
-              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items",
-          "host": [
-            "{{url_base}}"
-          ],
-          "path": [
-            "api",
-            "inventory",
-            "items"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Inventory By ID (Verify Put)",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", () => {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});\r",
-              "\r",
-              "// parse response\r",
-              "const res = pm.response.json();\r",
-              "const item = res.item || res.data || res;\r",
-              "\r",
-              "// lấy dữ liệu đã update từ request trước (PUT)\r",
-              "let requestBody = {};\r",
-              "try {\r",
-              "    requestBody = JSON.parse(pm.environment.get(\"last_update_body\"));\r",
-              "} catch (e) {\r",
-              "    console.log(\"No saved update data\");\r",
-              "}\r",
-              "\r",
-              "// verify\r",
-              "pm.test(\"Verify updated data from DB\", () => {\r",
-              "    if (requestBody.name) {\r",
-              "        pm.expect(item.name).to.eql(requestBody.name);\r",
-              "    }\r",
-              "\r",
-              "    if (requestBody.quantity) {\r",
-              "        pm.expect(item.quantity).to.eql(requestBody.quantity);\r",
-              "    }\r",
-              "});\r",
-              "\r",
-              "console.log(\"Verified item:\", item);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items/{{item_id}}",
-          "host": [
-            "{{url_base}}"
-          ],
-          "path": [
-            "api",
-            "inventory",
-            "items",
-            "{{item_id}}"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "GET Inventory By ID (Verify Delete)",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Item should be deleted (404)\", () => {\r",
-              "    pm.response.to.have.status(404);\r",
-              "});\r",
-              "\r",
-              "// debug\r",
-              "console.log(\"Verify delete response:\", pm.response.text());"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/api/inventory/items/{{item_id}}",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "api",
-            "inventory",
-            "items",
-            "{{item_id}}"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST Inventory Item",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Create success\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-              "});\r",
-              "\r",
-              "// 👉 parse response\r",
-              "const res = pm.response.json();\r",
-              "\r",
-              "// 👉 lấy đúng object\r",
-              "const item = res.item || res.data || res;\r",
-              "\r",
-              "// 👉 parse request body an toàn\r",
-              "let requestBody = {};\r",
-              "try {\r",
-              "    if (pm.request.body && pm.request.body.raw) {\r",
-              "        requestBody = JSON.parse(pm.request.body.raw);\r",
-              "    }\r",
-              "} catch (e) {\r",
-              "    console.log(\"Parse body error\");\r",
-              "}\r",
-              "\r",
-              "// ✅ test structure\r",
-              "pm.test(\"Has required fields\", () => {\r",
-              "    pm.expect(item).to.have.property(\"center_id\");\r",
-              "    pm.expect(item).to.have.property(\"name\");\r",
-              "    pm.expect(item).to.have.property(\"quantity\");\r",
-              "});\r",
-              "\r",
-              "// ✅ test data\r",
-              "pm.test(\"Data created correctly\", () => {\r",
-              "    if (requestBody.center_id !== undefined) {\r",
-              "        pm.expect(item.center_id).to.eql(requestBody.center_id);\r",
-              "    }\r",
-              "\r",
-              "    if (requestBody.name !== undefined) {\r",
-              "        pm.expect(item.name).to.eql(requestBody.name);\r",
-              "    }\r",
-              "\r",
-              "    if (requestBody.quantity !== undefined) {\r",
-              "        pm.expect(item.quantity).to.eql(requestBody.quantity);\r",
-              "    }\r",
-              "});\r",
-              "\r",
-              "// lưu id\r",
-              "if (item.id) {\r",
-              "    pm.environment.set(\"item_id\", item.id);\r",
-              "}\r",
-              "\r",
-              "// debug\r",
-              "console.log(\"Item:\", item);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"name\": \"Test Item\",\r\n  \"center_id\": 1,\r\n  \"part_number\": \"{{part_number}}\",\r\n  \"price\": 500,\r\n  \"quantity\": 100\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "pm.environment.set(\"access_token\", jsonData.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items",
-          "host": [
-            "{{url_base}}"
           ],
-          "path": [
-            "api",
-            "inventory",
-            "items"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST Inventory - Missing Name",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status should be 400 or 422\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
-              "});\r",
-              "\r",
-              "const res = pm.response.json();\r",
-              "\r",
-              "pm.test(\"Error message exists\", () => {\r",
-              "    pm.expect(res).to.have.property(\"error\");\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Error mentions name\", () => {\r",
-              "    pm.expect(res.error.toLowerCase()).to.include(\"name\");\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"center_id\": 1,\r\n  \"quantity\": 100\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email_username\": \"admin1\",\r\n  \"password\": \"12345\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
             }
-          }
-        },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items",
-          "host": [
-            "{{url_base}}"
-          ],
-          "path": [
-            "api",
-            "inventory",
-            "items"
-          ]
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "POST Inventory - Missing All Fields",
-      "event": [
+      "name": "Create Item",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status should be 400 or 422\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
-              "});\r",
-              "\r",
-              "const res = pm.response.json();\r",
-              "\r",
-              "pm.test(\"Error exists\", () => {\r",
-              "    pm.expect(res).to.have.property(\"error\");\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Error is not empty\", () => {\r",
-              "    pm.expect(res.error).to.not.be.empty;\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Create Missing Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 400 or 422\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400,422]);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Has error message\", () => {\r",
+                  "    pm.expect(res).to.have.property(\"error\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error mentions missing field\", () => {\r",
+                  "    pm.expect(res.error.toLowerCase()).to.include(\"name\");\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Error:\", res.error);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items",
-          "host": [
-            "{{url_base}}"
           ],
-          "path": [
-            "api",
-            "inventory",
-            "items"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST Inventory - Invalid Quantity",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status should be 400 or 422\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
-              "});\r",
-              "\r",
-              "const res = pm.response.json();\r",
-              "\r",
-              "pm.test(\"Error exists\", () => {\r",
-              "    pm.expect(res).to.have.property(\"error\");\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Error message is valid\", () => {\r",
-              "    const errorMsg = res.error.toLowerCase();\r",
-              "\r",
-              "    pm.expect(errorMsg.length).to.be.above(0);\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"name\": \"Test Item\",\r\n  \"center_id\": 1,\r\n  \"quantity\": -10\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"quantity\": 50\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items",
-          "host": [
-            "{{url_base}}"
-          ],
-          "path": [
-            "api",
-            "inventory",
-            "items"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST Inventory - Empty Name",
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status should be 400 or 422\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
-              "});\r",
-              "\r",
-              "const res = pm.response.json();\r",
-              "\r",
-              "pm.test(\"Error exists\", () => {\r",
-              "    pm.expect(res).to.have.property(\"error\");\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Error mentions name\", () => {\r",
-              "    pm.expect(res.error.toLowerCase()).to.include(\"name\");\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"name\": \"\",\r\n  \"center_id\": 1,\r\n  \"quantity\": 10\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Create Negative Quantity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Reject negative quantity\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Error message exists\", () => {\r",
+                  "    pm.expect(res).to.have.property(\"error\");\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Error:\", res.error);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items",
-          "host": [
-            "{{url_base}}"
           ],
-          "path": [
-            "api",
-            "inventory",
-            "items"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "PUT Inventory Item",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Update success\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
-              "});\r",
-              "\r",
-              "// parse response\r",
-              "let res = {};\r",
-              "try {\r",
-              "    res = pm.response.json();\r",
-              "} catch (e) {\r",
-              "    console.log(\"No JSON response (maybe 204)\");\r",
-              "}\r",
-              "\r",
-              "const item = res.item || res.data || res;\r",
-              "\r",
-              "// ✅ check khi có response\r",
-              "if (item && Object.keys(item).length > 0) {\r",
-              "\r",
-              "    pm.test(\"Response has updated fields\", () => {\r",
-              "        pm.expect(item).to.have.property(\"name\");\r",
-              "        pm.expect(item).to.have.property(\"quantity\");\r",
-              "    });\r",
-              "\r",
-              "    pm.test(\"Data updated correctly\", () => {\r",
-              "        const expectedName = pm.environment.get(\"update_name\");\r",
-              "\r",
-              "        if (expectedName) {\r",
-              "            pm.expect(item.name).to.eql(expectedName);\r",
-              "        }\r",
-              "    });\r",
-              "}\r",
-              "\r",
-              "// lưu body để verify\r",
-              "if (pm.request.body && pm.request.body.raw) {\r",
-              "    pm.environment.set(\"last_update_body\", pm.request.body.raw);\r",
-              "}\r",
-              "\r",
-              "console.log(\"Updated item:\", item);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "let random = Math.floor(Math.random() * 10000);\r",
-              "pm.environment.set(\"update_name\", \"Updated_\" + random);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"center_id\": 1,\r\n  \"name\": \"{{update_name}}\",\r\n  \"quantity\": 200\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Test\",\r\n  \"part_number\": \"NEG\",\r\n  \"quantity\": -5\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
             }
-          }
-        },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items/{{item_id}}",
-          "host": [
-            "{{url_base}}"
-          ],
-          "path": [
-            "api",
-            "inventory",
-            "items",
-            "{{item_id}}"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "PUT Inventory - Invalid Quantity (BUG)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "// ❗ BUG: API allows negative quantity (should return 400/422 but got 200)\r",
-              "\r",
-              "pm.test(\"Reject invalid quantity (BUG if fails)\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);\r",
-              "});\r",
-              "\r",
-              "// parse response an toàn\r",
-              "let res = {};\r",
-              "try {\r",
-              "    res = pm.response.json();\r",
-              "} catch (e) {\r",
-              "    console.log(\"No JSON response\");\r",
-              "}\r",
-              "\r",
-              "// 👉 nếu API trả success thì log BUG\r",
-              "if (pm.response.code === 200) {\r",
-              "    console.log(\"🚨 BUG DETECTED: API accepted negative quantity\");\r",
-              "}\r",
-              "\r",
-              "// 👉 chỉ check error khi thực sự có error\r",
-              "if (res && res.error) {\r",
-              "    pm.test(\"Error exists\", () => {\r",
-              "        pm.expect(res).to.have.property(\"error\");\r",
-              "    });\r",
-              "}\r",
-              "\r",
-              "// debug full response\r",
-              "console.log(\"Status:\", pm.response.code);\r",
-              "console.log(\"Response:\", res);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
+          },
+          "response": []
         },
         {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "let random = Math.floor(Math.random() * 10000);\r",
-              "pm.environment.set(\"update_name\", \"Updated_\" + random);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"name\": \"Valid Name\",\r\n  \"center_id\": 1,\r\n  \"part_number\": \"P001\",\r\n  \"price\": 500,\r\n  \"quantity\": -10\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Create Duplicate Part_number",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Duplicate fail\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400,409]);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.expect(res).to.have.property(\"error\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items/{{item_id}}",
-          "host": [
-            "{{url_base}}"
           ],
-          "path": [
-            "api",
-            "inventory",
-            "items",
-            "{{item_id}}"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "PUT Inventory – Item Not Found",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "// ❗ Test: update item không tồn tại\r",
-              "\r",
-              "pm.test(\"Item not found (BUG if pass)\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);\r",
-              "});\r",
-              "\r",
-              "// parse response an toàn\r",
-              "let res = {};\r",
-              "try {\r",
-              "    res = pm.response.json();\r",
-              "} catch (e) {}\r",
-              "\r",
-              "// detect BUG nếu API vẫn cho update\r",
-              "if (pm.response.code === 200) {\r",
-              "    console.log(\"🚨 BUG DETECTED: API updated non-existing item\");\r",
-              "}\r",
-              "\r",
-              "// debug\r",
-              "console.log(\"Status:\", pm.response.code);\r",
-              "console.log(\"Response:\", res);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "let random = Math.floor(Math.random() * 10000);\r",
-              "pm.environment.set(\"update_name\", \"Updated_\" + random);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "PUT",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"name\": \"Updated Item\",\r\n  \"center_id\": 1,\r\n  \"part_number\": \"P002\",\r\n  \"price\": 500,\r\n  \"quantity\": 100\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Brake Pad\",\r\n  \"part_number\": \"{{part_number}}\",\r\n  \"quantity\": 10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items/999999",
-          "host": [
-            "{{url_base}}"
+        {
+          "name": "Create Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Create item success\", () => {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response has item\", () => {\r",
+                  "    pm.expect(res).to.have.property(\"item\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Item has all required fields\", () => {\r",
+                  "    const item = pm.response.json().item;\r",
+                  "    pm.expect(item).to.have.property(\"id\");\r",
+                  "    pm.expect(item).to.have.property(\"name\");\r",
+                  "    pm.expect(item).to.have.property(\"part_number\"); // Bổ sung\r",
+                  "    pm.expect(item).to.have.property(\"quantity\");\r",
+                  "    pm.expect(item).to.have.property(\"price\"); // Bổ sung\r",
+                  "});\r",
+                  "pm.environment.set(\"item_id\", res.item.id);\r",
+                  "pm.environment.set(\"part_number\", res.item.part_number);\r",
+                  "\r",
+                  "console.log(\"Created item:\", res.item);\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
           ],
-          "path": [
-            "api",
-            "inventory",
-            "items",
-            "999999"
-          ]
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Brake Pad\",\r\n  \"part_number\": \"BP-{{timestamp}}\",\r\n  \"quantity\": 100,\r\n  \"price\": 10,\r\n  \"min_quantity\": 10,\r\n  \"center_id\": 4\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create No Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 (Unauthorized)\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has error message\", function () {\r",
+                  "    let jsonData = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(jsonData).to.be.an(\"object\");\r",
+                  "    pm.expect(jsonData).to.have.any.keys(\"msg\", \"error\", \"message\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message is about missing token\", function () {\r",
+                  "    let jsonData = pm.response.json();\r",
+                  "\r",
+                  "    // linh hoạt vì mỗi lib trả khác nhau\r",
+                  "    let msg = jsonData.msg || jsonData.error || jsonData.message;\r",
+                  "\r",
+                  "    pm.expect(msg.toLowerCase()).to.include(\"missing\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Brake Pad\",\r\n  \"part_number\": \"BP-{{timestamp}}\",\r\n  \"quantity\": 100,\r\n  \"price\": 10,\r\n  \"min_quantity\": 10,\r\n  \"center_id\": 4\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Invalid Data Type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Invalid data type\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400,422]);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.expect(res).to.have.property(\"error\");\r",
+                  "\r",
+                  "console.log(\"Error:\", res.error);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Test\",\r\n  \"quantity\": \"abc\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "DELETE Inventory",
-      "event": [
+      "name": "Get Items",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Delete success\", () => {\r",
-              "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
-              "});\r",
-              "\r",
-              "// debug\r",
-              "console.log(\"Delete response code:\", pm.response.code);"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
+          "name": "Get Item By ID",
+          "item": [
+            {
+              "name": "Get  By ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1. Kiểm tra Status Code\r",
+                      "pm.test(\"Status 200\", () => {\r",
+                      "    pm.expect(pm.response.code).to.eql(200);\r",
+                      "});\r",
+                      "\r",
+                      "const res = pm.response.json();\r",
+                      "\r",
+                      "// 2. Kiểm tra cấu trúc Response & Kiểu dữ liệu (Đáp ứng Task 1)\r",
+                      "pm.test(\"Item has all required fields and correct types\", () => {\r",
+                      "    pm.expect(res).to.have.property(\"id\");\r",
+                      "    pm.expect(res).to.have.property(\"name\");\r",
+                      "    pm.expect(res).to.have.property(\"part_number\");\r",
+                      "    \r",
+                      "    // Kiểm tra phải là số để phục vụ tính toán Task 4\r",
+                      "    pm.expect(res.quantity).to.be.a('number'); \r",
+                      "    pm.expect(res.price).to.be.a('number');\r",
+                      "});\r",
+                      "\r",
+                      "// 3. LƯU BIẾN CHO TASK 3 & TASK 4\r",
+                      "if (res.id) {\r",
+                      "    pm.environment.set(\"item_id\", res.id);\r",
+                      "}\r",
+                      "\r",
+                      "if (res.quantity !== undefined) {\r",
+                      "    pm.environment.set(\"old_quantity\", res.quantity);\r",
+                      "    \r",
+                      "    // GIẢ LẬP FINANCE \r",
+                      "    // Thiết lập số lượng Finance muốn trừ (ví dụ mua 5 cái)\r",
+                      "    let order_amount = 5; \r",
+                      "    pm.environment.set(\"order_amount\", order_amount);\r",
+                      "    \r",
+                      "    // Tính toán số lượng dự kiến còn lại sau khi trừ thành công\r",
+                      "    pm.environment.set(\"expected_after_success\", res.quantity - order_amount);\r",
+                      "    \r",
+                      "    // Tính toán một con số gây thiếu hàng (ví dụ hiện có 5, đòi trừ 100)\r",
+                      "    pm.environment.set(\"over_order_amount\", res.quantity + 100);\r",
+                      "}\r",
+                      "\r",
+                      "// 4. Kiểm tra logic min_quantity \r",
+                      "if (res.quantity <= res.min_quantity) {\r",
+                      "    console.warn(`[WARNING] Item ${res.id} is LOW STOCK! (Qty: ${res.quantity} <= Min: ${res.min_quantity})`);\r",
+                      "}\r",
+                      "\r",
+                      "console.log(\"--- BẢN TIN INTEGRATION TASK 4 ---\");\r",
+                      "console.log(\"ID đang dùng:\", pm.environment.get(\"item_id\"));\r",
+                      "console.log(\"Tồn kho hiện tại:\", pm.environment.get(\"old_quantity\"));\r",
+                      "console.log(\"Số lượng Finance sẽ trừ:\", pm.environment.get(\"order_amount\"));"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+                  "host": [
+                    "{{base_url_inventory}}"
+                  ],
+                  "path": [
+                    "api",
+                    "inventory",
+                    "items",
+                    "{{item_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get ID not found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status 404\", () => {\r",
+                      "    pm.expect(pm.response.code).to.eql(404);\r",
+                      "});\r",
+                      "\r",
+                      "const res = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Error exists\", () => {\r",
+                      "    pm.expect(res).to.have.property(\"error\");\r",
+                      "});\r",
+                      "\r",
+                      "console.log(\"Error:\", res.error);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url_inventory}}/api/inventory/items/999999",
+                  "host": [
+                    "{{base_url_inventory}}"
+                  ],
+                  "path": [
+                    "api",
+                    "inventory",
+                    "items",
+                    "999999"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
         },
         {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{url_base}}/api/inventory/items/{{item_id}}",
-          "host": [
-            "{{url_base}}"
+          "name": "Get List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", () => {\r",
+                  "    pm.expect(pm.response.code).to.eql(200);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Response is array\", () => {\r",
+                  "    pm.expect(res).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Each item has required fields\", () => {\r",
+                  "    if (res.length > 0) {\r",
+                  "        pm.expect(res[0]).to.have.property(\"id\");\r",
+                  "        pm.expect(res[0]).to.have.property(\"name\");\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"List:\", res);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
           ],
-          "path": [
-            "api",
-            "inventory",
-            "items",
-            "{{item_id}}"
-          ]
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get List Empty (optional)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Kiểm tra mã trạng thái trả về là 200\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Kiểm tra dữ liệu trả về có phải là mảng rỗng hay không\r",
+                  "pm.test(\"Response is an array\", function () {\r",
+                  "    let jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.be.an(\"array\");\r",
+                  "});\r",
+                  "// 3. Kiểm tra thời gian phản hồi (tùy chọn - đảm bảo hệ thống phản hồi nhanh)\r",
+                  "pm.test(\"Response time is less than 500ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
+    },
+    {
+      "name": "Update items",
+      "item": [
+        {
+          "name": "Update Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Kiểm tra Status Code\r",
+                  "pm.test(\"Status 200 or 204\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "const oldQty = Number(pm.environment.get(\"old_quantity\"));\r",
+                  "\r",
+                  "// Giả sử trong Body bạn gửi quantity mới là một số cụ thể, ví dụ: 40\r",
+                  "// Hoặc bạn có thể lấy trực tiếp từ request body nếu dùng biến\r",
+                  "const sentQty = JSON.parse(pm.request.body.raw).quantity;\r",
+                  "\r",
+                  "pm.test(\"Validate Stock Logic: Quantity updated correctly\", () => {\r",
+                  "    if (res.item) {\r",
+                  "        // Kiểm tra xem số lượng mới có đúng bằng số lượng bạn vừa gửi không\r",
+                  "        pm.expect(res.item.quantity).to.eql(sentQty);\r",
+                  "        \r",
+                  "        // Tính toán độ chênh lệch để log ra cho rõ ràng (Dành cho Integration Test)\r",
+                  "        const diff = oldQty - res.item.quantity;\r",
+                  "        console.log(`Số lượng giảm đi: ${diff} đơn vị (Từ ${oldQty} xuống ${res.item.quantity})`);\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "// 2. Validate Structure (Task 1)\r",
+                  "pm.test(\"Update response has required fields\", () => {\r",
+                  "    if (res.item) {\r",
+                  "        pm.expect(res.item).to.have.property(\"part_number\");\r",
+                  "        pm.expect(res.item).to.have.property(\"price\");\r",
+                  "    }\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Update success & Quantity validated\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"quantity\": 25\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Empty Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Handle validation or not found\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 422, 404]);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Error exists\", () => {\r",
+                  "    pm.expect(res).to.have.property(\"error\");\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Response:\", res);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Negative Quantity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Handle response correctly\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400,422,404]);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Error exists\", () => {\r",
+                  "    pm.expect(res).to.have.property(\"error\");\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Response:\", res);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": -10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Delete items",
+      "item": [
+        {
+          "name": "Delete Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 or 204\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200,204]);\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"Deleted successfully\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Not Foud",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404\", () => {\r",
+                  "    pm.expect(pm.response.code).to.eql(404);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "pm.expect(res).to.have.property(\"error\");\r",
+                  "\r",
+                  "console.log(\"Error:\", res.error);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/999999",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Low Stock",
+      "item": [
+        {
+          "name": "Low Stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Lấy dữ liệu trả về từ Server (thường là một danh sách các món hàng)\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "// 2. Kiểm tra xem Server có trả về đúng định dạng danh sách (Mảng) không\r",
+                  "pm.test(\"Dữ liệu trả về phải là một danh sách (Array)\", () => {\r",
+                  "    pm.expect(res).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "// 3. Kiểm tra logic nghiệp vụ: TẤT CẢ hàng trong này phải có số lượng thấp\r",
+                  "pm.test(\"Logic Check: Tất cả các mục phải có Quantity <= Min_Quantity\", () => {\r",
+                  "    // Duyệt qua từng món hàng (item) trong danh sách trả về\r",
+                  "    res.forEach(item => {\r",
+                  "        const qty = Number(item.quantity);\r",
+                  "        const minQty = Number(item.min_quantity);\r",
+                  "        \r",
+                  "        // Đây là lệnh kiểm tra quan trọng nhất:\r",
+                  "        // Kỳ vọng qty phải \"At most\" (nhỏ hơn hoặc bằng) minQty\r",
+                  "        pm.expect(qty).to.be.at.most(minQty, \r",
+                  "            `Lỗi logic tại Item ID ${item.id}: Tồn kho là ${qty} nhưng hạn mức là ${minQty}. Lẽ ra không được nằm trong danh sách Low Stock!`);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "// 4. Kiểm tra xem Item bạn vừa Update ở Bước 2 có nằm trong danh sách này không\r",
+                  "pm.test(\"Item vừa cập nhật phải xuất hiện trong danh sách Low Stock\", () => {\r",
+                  "    const targetId = pm.environment.get(\"item_id\");\r",
+                  "    // Tìm trong danh sách xem có ID nào trùng với ID mình vừa update không\r",
+                  "    const found = res.find(item => item.id == targetId);\r",
+                  "    pm.expect(found).to.not.be.undefined;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/low-stock",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "low-stock"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Integration Test",
+      "item": [
+        {
+          "name": "Get Current Stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Lấy giá trị từ biến môi trường\r",
+                  "let stock = Number(pm.environment.get(\"current_stock\"));\r",
+                  "let order = Number(pm.environment.get(\"order_amount\"));\r",
+                  "\r",
+                  "// 2. Thực hiện phép tính toán\r",
+                  "let finalQty = stock - order;\r",
+                  "\r",
+                  "// 3. Lưu kết quả vào một biến tạm mới\r",
+                  "pm.environment.set(\"calculated_quantity\", finalQty);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finance Deduct Round 1",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Lấy dữ liệu trả về từ Server\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "// 2. Lấy giá trị kỳ vọng đã tính toán ở Pre-request\r",
+                  "// Dùng Number() để đảm bảo so sánh số với số, tránh lỗi so sánh số với chuỗi\r",
+                  "const expectedQty = Number(pm.environment.get(\"calculated_quantity\"));\r",
+                  "\r",
+                  "// 3. Kiểm tra Status Code \r",
+                  "pm.test(\"Status code is 200\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});\r",
+                  "\r",
+                  "// 4. Kiểm tra Logic Khớp số lượng \r",
+                  "pm.test(\"Integration Check: Tồn kho thực tế khớp với số lượng Finance yêu cầu\", () => {\r",
+                  "    // Truy cập vào res.item.quantity dựa trên cấu trúc JSON trong ảnh của bạn\r",
+                  "    const actualQty = res.item ? res.item.quantity : res.quantity;\r",
+                  "    \r",
+                  "    pm.expect(actualQty).to.eql(expectedQty, \r",
+                  "        `Lỗi: Kỳ vọng còn ${expectedQty} nhưng thực tế Server lưu ${actualQty}`);\r",
+                  "});\r",
+                  "\r",
+                  "// 5. Kiểm tra cấu trúc Response \r",
+                  "pm.test(\"Response contains required fields: part_number and price\", () => {\r",
+                  "    const item = res.item || res;\r",
+                  "    pm.expect(item).to.have.property(\"part_number\");\r",
+                  "    pm.expect(item).to.have.property(\"price\");\r",
+                  "});\r",
+                  "\r",
+                  "console.log(\"✅ Integration Test Passed: Stock updated from \" + \r",
+                  "            pm.environment.get(\"current_stock\") + \" to \" + expectedQty);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": {{calculated_quantity}}\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finance Deduct - Insufficient Stock (Fail)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// 1. Lấy số lượng thực tế đang có trong kho (đã lưu từ request GET trước đó)\r",
+                  "let currentStock = Number(pm.environment.get(\"current_stock\"));\r",
+                  "\r",
+                  "// 2. Giả lập Finance đòi trừ một con số khổng lồ (Ví dụ: hiện có 95, đòi trừ 1000)\r",
+                  "// Kết quả sẽ là một số âm (95 - 1000 = -905)\r",
+                  "let overDeductQty = currentStock - 1000;\r",
+                  "\r",
+                  "// 3. Lưu con số âm này vào biến để đưa vào Body\r",
+                  "pm.environment.set(\"insufficient_quantity\", overDeductQty);\r",
+                  "\r",
+                  "console.log(\"--- GIẢ LẬP THIẾU HÀNG ---\");\r",
+                  "console.log(\"Số dư hiện tại:\", currentStock);\r",
+                  "console.log(\"Số lượng yêu cầu sau khi trừ (âm):\", overDeductQty);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"1. Phải trả về lỗi 400 hoặc 404 (Không đủ hàng)\", function () {\r",
+                  "    // Vì logic code Python của bạn trả về None, \"Không đủ hàng trong kho\"\r",
+                  "    // Nên thường mã lỗi sẽ là 400 (Bad Request)\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 404]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"2. Tin nhắn báo lỗi chính xác\", function () {\r",
+                  "    var jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.error).to.eql(\"Không đủ hàng trong kho\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": 66,\r\n    \"quantity_to_deduct\": 1000,\r\n    \"update_reason\": \"Test Over-deduction\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Advanced Edge Cases",
+      "item": [
+        {
+          "name": "Update Stress Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Kiểm tra xem mỗi lần chạy có thành công (200) hay không\r",
+                  "pm.test(\"Lần chạy thứ \" + (pm.info.iteration + 1) + \" thành công\", () => {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra thời gian phản hồi (Để xem server có bị chậm đi khi update liên tục không)\r",
+                  "pm.test(\"Thời gian phản hồi nhanh (< 500ms)\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "console.log(`Đã chạy xong lần thứ: ${pm.info.iteration + 1}`);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 150, \r\n    \"price\": 25 \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deduct Round 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "var deductQty = 10;\r",
+                  "\r",
+                  "// Lấy số lượng từ lần test trước (95) đã lưu trong old_qty\r",
+                  "var oldQty = pm.environment.get(\"old_qty\") || 95; \r",
+                  "var expected = oldQty - deductQty;\r",
+                  "\r",
+                  "pm.test(\"Kiểm tra khấu trừ đợt 2 chính xác\", function () {\r",
+                  "    pm.expect(jsonData.item.quantity).to.eql(expected, \r",
+                  "        `Sai logic liên tục: Lấy ${oldQty} trừ 10 phải ra ${expected} nhưng lại ra ${jsonData.item.quantity}`);\r",
+                  "});\r",
+                  "\r",
+                  "// Cập nhật lại biến môi trường cho vòng test tiếp theo\r",
+                  "pm.environment.set(\"old_qty\", jsonData.item.quantity);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "let current = Number(pm.environment.get(\"calculated_quantity\")); // Lấy 95\r",
+                  "let nextQty = current - 10; // Trừ tiếp 10\r",
+                  "pm.environment.set(\"final_expected\", nextQty);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": 66,\r\n    \"quantity_to_deduct\": 10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Deleted Item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//  Server phải trả về 404 Not Found\r",
+                  "pm.test(\"Bảo mật: Không được phép Update hàng đã xóa\", () => {\r",
+                  "    if (pm.response.code === 200) {\r",
+                  "        console.error(\"BUG: Server vẫn cho sửa hàng đã bị xóa!\");\r",
+                  "    }\r",
+                  "    pm.expect(pm.response.code).to.equal(404);\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "pm.test(\"Thông báo lỗi rõ ràng\", () => {\r",
+                  "    pm.expect(res.message.toLowerCase()).to.include(\"not found\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "let current = Number(pm.environment.get(\"calculated_quantity\")); // Lấy 95\r",
+                  "let nextQty = current - 10; // Trừ tiếp 10\r",
+                  "pm.environment.set(\"final_expected\", nextQty);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\": 100}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url_inventory}}/api/inventory/items/{{item_id}}",
+              "host": [
+                "{{base_url_inventory}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "items",
+                "{{item_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "pm.environment.set(\"timestamp\", new Date().getTime());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
     }
   ]
 }

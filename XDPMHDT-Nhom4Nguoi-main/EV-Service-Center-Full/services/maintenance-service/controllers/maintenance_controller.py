@@ -157,6 +157,22 @@ def update_task_status_route(task_id):
         "task": task.to_dict()
     }), 200
 
+# 6. DELETE TASK (Admin only, only pending tasks)
+@maintenance_bp.route("/tasks/<int:task_id>", methods=["DELETE"])
+@jwt_required()
+@admin_required()
+def delete_task_route(task_id):
+    """Delete a maintenance task - only pending tasks can be deleted"""
+    success, error = service.delete_task(task_id)
+    
+    if error:
+        status_code = 404 if "Không tìm thấy" in error else 400
+        return jsonify({"error": error}), status_code
+    
+    return jsonify({
+        "message": "Xóa công việc bảo trì thành công."
+    }), 200
+
 
 # ============= Task Parts Endpoints =============
 

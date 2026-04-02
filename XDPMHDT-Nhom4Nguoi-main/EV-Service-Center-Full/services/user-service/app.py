@@ -33,6 +33,7 @@ def create_app():
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "secretkey")
     app.config["INTERNAL_SERVICE_TOKEN"] = os.getenv("INTERNAL_SERVICE_TOKEN")
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=7)
+
     # ===== KHỞI TẠO EXTENSIONS =====
     db.init_app(app)
     jwt.init_app(app)

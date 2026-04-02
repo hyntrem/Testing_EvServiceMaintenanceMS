@@ -1,0 +1,600 @@
+{
+  "info": {
+    "name": "EV Service - Maintenance & Notification (Cleaned)",
+    "_postman_id": "maintenance-cleaned-2024",
+    "description": "Cleaned collection - Only core CRUD operations for Maintenance Service based on 6 Jira tasks",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login - Get Admin Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response has access_token\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('access_token');",
+                "    pm.expect(json).to.have.property('user');",
+                "    pm.expect(json.user.role).to.eql('admin');",
+                "});",
+                "if (pm.response.json().access_token) {",
+                "    pm.environment.set('jwt_admin', pm.response.json().access_token);",
+                "    console.log('✅ Admin token saved to jwt_admin');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Login - Get User Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_username\": \"user1\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response has access_token\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('access_token');",
+                "});",
+                "if (pm.response.json().access_token) {",
+                "    pm.environment.set('jwt_user', pm.response.json().access_token);",
+                "    console.log('✅ User token saved to jwt_user');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Login - Get Technician Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_username\": \"tech1\",\n  \"password\": \"tech123\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response has access_token\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('access_token');",
+                "});",
+                "if (pm.response.json().access_token) {",
+                "    pm.environment.set('jwt_tech', pm.response.json().access_token);",
+                "    console.log('✅ Technician token saved to jwt_tech');",
+                "}"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Maintenance Service",
+      "item": [
+        {
+          "name": "POST /api/maintenance/tasks",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{jwt_admin}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "tasks"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": 4,\n  \"technician_id\": 4\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[CREATE-01] Status code is 201 Created\", () => {",
+                "    pm.response.to.have.status(201);",
+                "});",
+                "pm.test(\"[CREATE-02] Response has success message\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('message');",
+                "    pm.expect(json.message).to.include('thành công');",
+                "});",
+                "pm.test(\"[CREATE-03] Task object has all required fields\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('task');",
+                "    pm.expect(json.task).to.have.property('task_id');",
+                "    pm.expect(json.task).to.have.property('booking_id');",
+                "    pm.expect(json.task).to.have.property('user_id');",
+                "    pm.expect(json.task).to.have.property('technician_id');",
+                "    pm.expect(json.task).to.have.property('status');",
+                "    pm.expect(json.task).to.have.property('vehicle_vin');",
+                "    pm.expect(json.task).to.have.property('description');",
+                "});",
+                "pm.test(\"[CREATE-04] Task has correct initial status\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json.task.status).to.eql('pending');",
+                "});",
+                "pm.test(\"[CREATE-05] Task has correct booking_id and technician_id\", () => {",
+                "    const json = pm.response.json();",
+                "    const requestBody = JSON.parse(pm.request.body.raw);",
+                "    pm.expect(json.task.booking_id).to.eql(requestBody.booking_id);",
+                "    pm.expect(json.task.technician_id).to.eql(requestBody.technician_id);",
+                "});",
+                "if (pm.response.code === 201 && pm.response.json().task) {",
+                "    pm.environment.set('task_id', pm.response.json().task.task_id);",
+                "    console.log('✅ Task created. task_id saved: ' + pm.response.json().task.task_id);",
+                "}",
+                "pm.test(\"[CREATE-06] Response time < 2000ms\", () => {",
+                "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "GET /api/maintenance/tasks",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_admin}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "tasks"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[GET-LIST-01] Status code is 200 OK\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "pm.test(\"[GET-LIST-02] Response is an array\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.be.an('array');",
+                "});",
+                "pm.test(\"[GET-LIST-03] Array contains task objects with required fields\", () => {",
+                "    const json = pm.response.json();",
+                "    if (json.length > 0) {",
+                "        pm.expect(json[0]).to.have.property('task_id');",
+                "        pm.expect(json[0]).to.have.property('status');",
+                "        pm.expect(json[0]).to.have.property('booking_id');",
+                "    }",
+                "});",
+                "if (pm.response.json().length > 0) {",
+                "    pm.environment.set('task_id', pm.response.json()[0].task_id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "GET /api/maintenance/my-tasks",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_user}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/my-tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "my-tasks"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[GET-MY-TASKS-01] Status code is 200 OK\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "pm.test(\"[GET-MY-TASKS-02] Response is an array\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.be.an('array');",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "GET /api/maintenance/tasks/{id}",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_admin}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/tasks/{{task_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "tasks", "{{task_id}}"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[GET-BY-ID-01] Status code is 200 OK\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "pm.test(\"[GET-BY-ID-02] Response has task details\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('task_id');",
+                "    pm.expect(json).to.have.property('status');",
+                "    pm.expect(json).to.have.property('booking_id');",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "PUT /api/maintenance/tasks/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{jwt_admin}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/tasks/{{task_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "tasks", "{{task_id}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[UPDATE-01] Status code is 200 OK\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "pm.test(\"[UPDATE-02] Response has success message\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('message');",
+                "});",
+                "pm.test(\"[UPDATE-03] Task status updated\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('task');",
+                "    pm.expect(json.task.status).to.eql('in_progress');",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "DELETE /api/maintenance/tasks/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_admin}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/maintenance/tasks/{{task_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "maintenance", "tasks", "{{task_id}}"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[DELETE-01] Status code is 200 OK or 400 (if not pending)\", () => {",
+                "    pm.expect([200, 400]).to.include(pm.response.code);",
+                "});",
+                "if (pm.response.code === 200) {",
+                "    pm.test(\"[DELETE-02] Response has success message\", () => {",
+                "        const json = pm.response.json();",
+                "        pm.expect(json).to.have.property('message');",
+                "        pm.expect(json.message).to.include('thành công');",
+                "    });",
+                "} else {",
+                "    pm.test(\"[DELETE-02] Error indicates cannot delete non-pending task\", () => {",
+                "        const json = pm.response.json();",
+                "        pm.expect(json).to.have.property('error');",
+                "    });",
+                "}"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Notification Service",
+      "item": [
+        {
+          "name": "Create Test Notification (Internal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "X-Internal-Token", "value": "{{internal_token}}"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/internal/notifications/create",
+              "host": ["{{base_url}}"],
+              "path": ["internal", "notifications", "create"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": {{user_id}},\n  \"title\": \"Test Notification\",\n  \"message\": \"This is a test notification for Postman testing\",\n  \"type\": \"info\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Extract user_id from jwt_user token",
+                  "const jwtToken = pm.environment.get('jwt_user');",
+                  "if (jwtToken) {",
+                  "    // Decode JWT token (simple base64 decode of payload)",
+                  "    const base64Url = jwtToken.split('.')[1];",
+                  "    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');",
+                  "    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {",
+                  "        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);",
+                  "    }).join(''));",
+                  "    const payload = JSON.parse(jsonPayload);",
+                  "    const userId = payload.sub;",
+                  "    pm.environment.set('user_id', userId);",
+                  "    console.log('✅ user_id extracted from jwt_user: ' + userId);",
+                  "} else {",
+                  "    console.error('❌ jwt_user token not found! Run Login first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[NOTIF-CREATE-01] Status code is 201 Created\", () => {",
+                "    pm.response.to.have.status(201);",
+                "});",
+                "",
+                "pm.test(\"[NOTIF-CREATE-02] Response has notification object\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('notification');",
+                "    pm.expect(json.notification).to.have.property('id');",
+                "});",
+                "",
+                "// Auto-save notification_id for later tests",
+                "if (pm.response.code === 201 && pm.response.json().notification) {",
+                "    pm.environment.set('notification_id', pm.response.json().notification.id);",
+                "    console.log('✅ Test notification created. notification_id saved: ' + pm.response.json().notification.id);",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "GET /api/notifications/my-notifications",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_user}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/my-notifications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "my-notifications"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"[NOTIF-GET-01] Status code is 200\", () => pm.response.to.have.status(200));",
+                "",
+                "pm.test(\"[NOTIF-GET-02] Response is array\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.be.an('array');",
+                "});",
+                "",
+                "// Auto-save notification_id from first notification",
+                "const notifications = pm.response.json();",
+                "if (notifications.length > 0) {",
+                "    pm.environment.set('notification_id', notifications[0].id);",
+                "    console.log('✅ notification_id saved: ' + notifications[0].id);",
+                "    pm.test(\"[NOTIF-GET-03] Notification has required fields\", () => {",
+                "        pm.expect(notifications[0]).to.have.property('id');",
+                "        pm.expect(notifications[0]).to.have.property('user_id');",
+                "        pm.expect(notifications[0]).to.have.property('title');",
+                "        pm.expect(notifications[0]).to.have.property('message');",
+                "    });",
+                "} else {",
+                "    console.log('⚠️ No notifications found. Run \"Create Test Notification\" first to populate notification_id.');",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "GET /api/notifications/stats",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_user}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "stats"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response has stats\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('total');",
+                "    pm.expect(json).to.have.property('unread');",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "PUT /api/notifications/{id}/read",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_user}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "{{notification_id}}", "read"]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Check if notification_id exists",
+                  "const notifId = pm.environment.get('notification_id');",
+                  "if (!notifId) {",
+                  "    console.error('❌ notification_id is not set! Run \"Create Test Notification\" or \"GET my-notifications\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response has success message\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('message');",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "PUT /api/notifications/read-all",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_user}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/read-all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "read-all"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response has success message\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('message');",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "DELETE /api/notifications/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_user}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/{{notification_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "{{notification_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Check if notification_id exists",
+                  "const notifId = pm.environment.get('notification_id');",
+                  "if (!notifId) {",
+                  "    console.error('❌ notification_id is not set! Run \"Create Test Notification\" or \"GET my-notifications\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response has success message\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.have.property('message');",
+                "});"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "GET /api/notifications/admin/all",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_admin}}"}],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/admin/all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "admin", "all"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                "pm.test(\"Response is array\", () => {",
+                "    const json = pm.response.json();",
+                "    pm.expect(json).to.be.an('array');",
+                "});"
+              ]
+            }
+          }]
+        }
+      ]
+    }
+  ]
+}
