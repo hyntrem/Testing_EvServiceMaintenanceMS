@@ -643,6 +643,82 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Add Part To Task",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "let res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Response has part object\", function () {\r",
+              "    pm.expect(res).to.have.property(\"part\");\r",
+              "    pm.expect(res.part).to.be.an(\"object\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Part has required fields\", function () {\r",
+              "    pm.expect(res.part).to.have.property(\"id\");\r",
+              "    pm.expect(res.part).to.have.property(\"task_id\");\r",
+              "    pm.expect(res.part).to.have.property(\"item_id\");\r",
+              "    pm.expect(res.part).to.have.property(\"quantity\");\r",
+              "});\r",
+              "\r",
+              "pm.environment.set(\"part_id\", res.part.id);\r",
+              "pm.environment.set(\"used_quantity\", res.part.quantity);\r",
+              "\r",
+              "pm.test(\"Saved part_id\", function () {\r",
+              "    pm.expect(pm.environment.get(\"part_id\")).to.exist;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"item_id\": {{item_id}},\r\n  \"quantity\": 3\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/maintenance/tasks/{{task_id}}/parts",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "maintenance",
+            "tasks",
+            "{{task_id}}",
+            "parts"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
