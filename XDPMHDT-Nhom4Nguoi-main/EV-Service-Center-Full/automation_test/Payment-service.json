@@ -598,6 +598,73 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Update status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "let res = pm.response.json();\r",
+              "let req = JSON.parse(pm.request.body.raw);\r",
+              "\r",
+              "pm.test(\"Response contains invoice\", function () {\r",
+              "    pm.expect(res.invoice).to.exist;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Invoice status updated correctly\", function () {\r",
+              "    pm.expect(res.invoice.status).to.eql(req.status);\r",
+              "});\r",
+              "\r",
+              "pm.environment.set(\"invoice_status\", res.invoice.status);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{admin_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"status\": \"pending\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url_finance}}/api/invoices/{{invoice_id}}/status",
+          "host": [
+            "{{base_url_finance}}"
+          ],
+          "path": [
+            "api",
+            "invoices",
+            "{{invoice_id}}",
+            "status"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": [

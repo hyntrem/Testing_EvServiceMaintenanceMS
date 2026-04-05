@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from services.inventory_service import InventoryService as service 
+from flask_jwt_extended import jwt_required
 
 inventory_bp = Blueprint("inventory", __name__, url_prefix="/api/inventory")
 
 # ✅ 1. CREATE ITEM (POST /api/inventory/items)
 @inventory_bp.route("/items", methods=["POST"])
+@jwt_required()
 def create_item():
     data = request.get_json()
     required_fields = ["name", "part_number", "price"]
@@ -30,6 +32,7 @@ def get_all_items():
 
 # ✅ 3. GET LOW STOCK ITEMS (GET /api/inventory/low-stock?center_id=1)
 @inventory_bp.route("/low-stock", methods=["GET"])
+@jwt_required()
 def get_low_stock():
     center_id = request.args.get('center_id', type=int)
     
@@ -46,6 +49,7 @@ def get_item(item_id):
 
 # ✅ 5. UPDATE ITEM (PUT /api/inventory/items/<int:item_id>)
 @inventory_bp.route("/items/<int:item_id>", methods=["PUT"])
+@jwt_required()
 def update_item(item_id):
     data = request.get_json()
     item, error = service.update_item(item_id, data)
@@ -57,6 +61,7 @@ def update_item(item_id):
 
 # ✅ 6. DELETE ITEM (DELETE /api/inventory/items/<int:item_id>)
 @inventory_bp.route("/items/<int:item_id>", methods=["DELETE"])
+@jwt_required()
 def delete_item_route(item_id):
     success, message = service.delete_item(item_id)
     

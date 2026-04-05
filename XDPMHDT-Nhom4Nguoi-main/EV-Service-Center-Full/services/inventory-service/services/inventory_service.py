@@ -89,21 +89,34 @@ class InventoryService:
         old_quantity = item.quantity
         
         try:
+            # 1. Cập nhật Tên
             if "name" in data:
-                if len(data["name"] )>0:
-                    item.name = data["name"] 
+                if len(data["name"]) > 0:
+                    item.name = data["name"]
                 else:
-                    return None,"Tên không đc rỗng"
-            if "quantity" in data:
-                if int(data["quantity"]) >0:
+                    return None, "Tên không đc rỗng"
+
+            # 2. Xử lý Số lượng (Ưu tiên Trừ kho trước, sau đó mới tới Cập nhật trực tiếp)
+            # Kiểm tra nếu gửi quantity_to_deduct thì thực hiện phép trừ
+            if "quantity_to_deduct" in data:
+                deduct_val = int(data["quantity_to_deduct"])
+                if deduct_val > item.quantity:
+                    return None, "Không đủ hàng trong kho"
+                item.quantity -= deduct_val
+
+            # Nếu không trừ kho, kiểm tra xem có cập nhật trực tiếp số lượng không (dành cho Admin)
+            elif "quantity" in data:
+                if int(data["quantity"]) >= 0:
                     item.quantity = int(data["quantity"])
                 else:
-                   return None,"Quantity không đc âm"
+                    return None, "Quantity không đc âm"
+
+            # 3. Cập nhật các thông tin khác
             if "min_quantity" in data: item.min_quantity = int(data["min_quantity"])
             if "price" in data: item.price = float(data["price"])
             if "center_id" in data: item.center_id = int(data["center_id"])
             
-            # Update Compatibility Table
+            # 4. Cập nhật bảng tương thích (Compatibility Table)
             comp = InventoryCompatibility.query.filter_by(inventory_id=item_id).first()
             if "compatible_models" in data or "category" in data:
                 if not comp:
@@ -115,6 +128,7 @@ class InventoryService:
 
             db.session.commit()
             
+            # 5. Xử lý thông báo (Notifications)
             if NotificationHelper:
                 if item.quantity == 0 and old_quantity > 0:
                     InventoryService._notify_out_of_stock(item)
@@ -122,6 +136,7 @@ class InventoryService:
                     InventoryService._notify_low_stock(item)
             
             return item, None
+
         except Exception as e:
             db.session.rollback()
             return None, f"Lỗi cập nhật: {str(e)}"

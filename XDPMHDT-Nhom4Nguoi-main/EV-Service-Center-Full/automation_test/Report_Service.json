@@ -8,28 +8,645 @@
   },
   "item": [
     {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code phải là 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// Parse JSON response\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "// Kiểm tra access_token tồn tại\r",
+                  "pm.test(\"Response phải có access_token\", function () {\r",
+                  "    pm.expect(jsonData).to.have.property(\"access_token\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra access_token là dạng string\r",
+                  "pm.test(\"access_token phải là string\", function () {\r",
+                  "    pm.expect(jsonData.access_token).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra token không rỗng\r",
+                  "pm.test(\"access_token không được rỗng\", function () {\r",
+                  "    pm.expect(jsonData.access_token.length).to.be.above(10);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email_username\" : \"{{email_userName}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localUrl}}/api/login",
+              "host": [
+                "{{localUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative cases",
+      "item": [
+        {
+          "name": "Token missing passward",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email_username\" : \"{{email_userName}}\"\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localUrl}}/api/login",
+              "host": [
+                "{{localUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Token missing email_username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"password\": \"{{password}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localUrl}}/api/login",
+              "host": [
+                "{{localUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Token missing all",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 415\", function () {\r",
+                  "    pm.response.to.have.status(415);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{localUrl}}/api/login",
+              "host": [
+                "{{localUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Report management",
+      "item": [
+        {
+          "name": "Revenue Report",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Lấy token từ environment\r",
+                  "const accessToken = pm.environment.get(\"access_token\");\r",
+                  "// Thêm token vào header Authorization\r",
+                  "pm.request.headers.add({\r",
+                  "    key: \"Authorization\",\r",
+                  "    value: `Bearer ${accessToken}`\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code là 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response trả về dạng JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "pm.test(\"Kiểm tra các field tồn tại\", function () {\r",
+                  "    pm.expect(res).to.have.property(\"avg_transaction_value\");\r",
+                  "    pm.expect(res).to.have.property(\"payment_methods\");\r",
+                  "    pm.expect(res).to.have.property(\"period\");\r",
+                  "    pm.expect(res.period).to.have.property(\"start_date\");\r",
+                  "    pm.expect(res.period).to.have.property(\"end_date\");\r",
+                  "    pm.expect(res).to.have.property(\"total_revenue\");\r",
+                  "    pm.expect(res).to.have.property(\"transaction_count\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Kiểm tra giá trị của các field\", function () {\r",
+                  "    pm.expect(res.avg_transaction_value).to.be.a(\"number\");\r",
+                  "    pm.expect(res.payment_methods).to.be.a(\"object\");\r",
+                  "    pm.expect(res.total_revenue).to.be.a(\"number\");\r",
+                  "    pm.expect(res.transaction_count).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "//So sánh end_date và start_date\r",
+                  "pm.test(\"Kiểm tra end_date lớn hơn hoặc bằng start_date\", function () {\r",
+                  "    const startDate = new Date(res.period.start_date);\r",
+                  "    const endDate = new Date(res.period.end_date);\r",
+                  "    pm.expect(endDate).to.be.at.least(startDate);\r",
+                  "    });\r",
+                  "\r",
+                  "//kiểm tra tổng doanh thu có bằng tổng các nguồn\r",
+                  "pm.test(\"Kiểm tra tổng doanh thu bằng tổng các nguồn\", function () {\r",
+                  "    const totalRevenue = res.total_revenue;\r",
+                  "    const avgTransactionValue = res.avg_transaction_value;\r",
+                  "    const transactionCount = res.transaction_count;\r",
+                  "    pm.expect(totalRevenue).to.equal(avgTransactionValue * transactionCount);\r",
+                  "    });\r",
+                  "\r",
+                  "//kiểm tra thời gian của kết quả trả về\r",
+                  "pm.test(\"Kiểm tra thời gian\", function () {\r",
+                  "    const responseTime = pm.response.responseTime;\r",
+                  "    pm.expect(responseTime).to.be.below(1000); \r",
+                  "    });\r",
+                  "//Kiểm tra định dạng payment_methods\r",
+                  "pm.test(\"Kiểm tra định dạng payment_methods\", function () {\r",
+                  "    Object.values(res.payment_methods).forEach(value => {\r",
+                  "        pm.expect(value).to.be.a(\"number\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "pm.test(\"Kiểm tra total_revenue không âm\", function () {\r",
+                  "    pm.expect(res.total_revenue).to.be.at.least(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/revenue",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "revenue"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Inventory Report",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Lấy token từ environment\r",
+                  "const accessToken = pm.environment.get(\"access_token\");\r",
+                  "// Thêm token vào header Authorization\r",
+                  "pm.request.headers.add({\r",
+                  "    key: \"Authorization\",\r",
+                  "    value: `Bearer ${accessToken}`\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Kiểm tra status code\r",
+                  "pm.test(\"Status code là 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra response dạng JSON\r",
+                  "pm.test(\"Response trả về dạng JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "// Kiểm tra các field tồn tại\r",
+                  "pm.test(\"Kiểm tra các field tồn tại\", function () {\r",
+                  "    pm.expect(res).to.have.property(\"low_stock_count\");\r",
+                  "    pm.expect(res).to.have.property(\"low_stock_parts\");\r",
+                  "    pm.expect(res).to.have.property(\"out_of_stock_count\");\r",
+                  "    pm.expect(res).to.have.property(\"out_of_stock_parts\");\r",
+                  "    pm.expect(res).to.have.property(\"total_inventory_value\");\r",
+                  "    pm.expect(res).to.have.property(\"total_parts\");\r",
+                  "    pm.expect(res).to.have.property(\"total_quantity\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra kiểu dữ liệu từng field\r",
+                  "pm.test(\"Kiểm tra kiểu dữ liệu\", function () {\r",
+                  "    pm.expect(res.low_stock_count).to.be.a(\"number\");\r",
+                  "    pm.expect(res.low_stock_parts).to.be.an(\"array\");\r",
+                  "    pm.expect(res.out_of_stock_count).to.be.a(\"number\");\r",
+                  "    pm.expect(res.out_of_stock_parts).to.be.an(\"array\");\r",
+                  "    pm.expect(res.total_inventory_value).to.be.a(\"number\");\r",
+                  "    pm.expect(res.total_parts).to.be.a(\"number\");\r",
+                  "    pm.expect(res.total_quantity).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra giá trị không âm\r",
+                  "pm.test(\"Kiểm tra các giá trị không âm\", function () {\r",
+                  "    pm.expect(res.low_stock_count).to.be.at.least(0);\r",
+                  "    pm.expect(res.out_of_stock_count).to.be.at.least(0);\r",
+                  "    pm.expect(res.total_inventory_value).to.be.at.least(0);\r",
+                  "    pm.expect(res.total_parts).to.be.at.least(0);\r",
+                  "    pm.expect(res.total_quantity).to.be.at.least(0);\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra mảng low_stock_parts nếu khác rỗng thì phải là object\r",
+                  "pm.test(\"Kiểm tra phần tử trong low_stock_parts\", function () {\r",
+                  "    res.low_stock_parts.forEach(item => {\r",
+                  "        pm.expect(item).to.be.an(\"object\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra mảng out_of_stock_parts nếu khác rỗng thì phải là object\r",
+                  "pm.test(\"Kiểm tra phần tử trong out_of_stock_parts\", function () {\r",
+                  "    res.out_of_stock_parts.forEach(item => {\r",
+                  "        pm.expect(item).to.be.an(\"object\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "// Kiểm tra thời gian phản hồi\r",
+                  "pm.test(\"Kiểm tra thời gian phản hồi < 1000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/inventory",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "inventory"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dashboard",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Lấy token từ environment\r",
+                  "const accessToken = pm.environment.get(\"access_token\");\r",
+                  "// Thêm token vào header Authorization\r",
+                  "pm.request.headers.add({\r",
+                  "    key: \"Authorization\",\r",
+                  "    value: `Bearer ${accessToken}`\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// ===============================\r",
+                  "// Kiểm tra status & JSON format\r",
+                  "// ===============================\r",
+                  "pm.test(\"Status code là 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response trả về dạng JSON\", function () {\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// Kiểm tra các field cấp cao nhất\r",
+                  "// ===============================\r",
+                  "pm.test(\"Kiểm tra các field root tồn tại\", function () {\r",
+                  "    pm.expect(res).to.have.property(\"bookings\");\r",
+                  "    pm.expect(res).to.have.property(\"inventory\");\r",
+                  "    pm.expect(res).to.have.property(\"revenue\");\r",
+                  "    pm.expect(res).to.have.property(\"timestamp\");\r",
+                  "});\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// Kiểm tra BOOKING\r",
+                  "// ===============================\r",
+                  "pm.test(\"Kiểm tra các field bookings tồn tại\", function () {\r",
+                  "    pm.expect(res.bookings).to.have.property(\"completed\");\r",
+                  "    pm.expect(res.bookings).to.have.property(\"confirmed\");\r",
+                  "    pm.expect(res.bookings).to.have.property(\"pending\");\r",
+                  "    pm.expect(res.bookings).to.have.property(\"total\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Kiểm tra kiểu dữ liệu bookings\", function () {\r",
+                  "    pm.expect(res.bookings.completed).to.be.a(\"number\");\r",
+                  "    pm.expect(res.bookings.confirmed).to.be.a(\"number\");\r",
+                  "    pm.expect(res.bookings.pending).to.be.a(\"number\");\r",
+                  "    pm.expect(res.bookings.total).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "// Tổng booking phải = sum\r",
+                  "pm.test(\"Kiểm tra total bookings\", function () {\r",
+                  "    const b = res.bookings;\r",
+                  "    pm.expect(b.total).to.equal(b.completed + b.confirmed + b.pending);\r",
+                  "});\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// Kiểm tra INVENTORY\r",
+                  "// ===============================\r",
+                  "pm.test(\"Kiểm tra các field inventory tồn tại\", function () {\r",
+                  "    const inv = res.inventory;\r",
+                  "    pm.expect(inv).to.have.property(\"low_stock_count\");\r",
+                  "    pm.expect(inv).to.have.property(\"low_stock_parts\");\r",
+                  "    pm.expect(inv).to.have.property(\"out_of_stock_count\");\r",
+                  "    pm.expect(inv).to.have.property(\"out_of_stock_parts\");\r",
+                  "    pm.expect(inv).to.have.property(\"total_inventory_value\");\r",
+                  "    pm.expect(inv).to.have.property(\"total_parts\");\r",
+                  "    pm.expect(inv).to.have.property(\"total_quantity\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Kiểm tra kiểu dữ liệu inventory\", function () {\r",
+                  "    const inv = res.inventory;\r",
+                  "    pm.expect(inv.low_stock_count).to.be.a(\"number\");\r",
+                  "    pm.expect(inv.low_stock_parts).to.be.an(\"array\");\r",
+                  "    pm.expect(inv.out_of_stock_count).to.be.a(\"number\");\r",
+                  "    pm.expect(inv.out_of_stock_parts).to.be.an(\"array\");\r",
+                  "    pm.expect(inv.total_inventory_value).to.be.a(\"number\");\r",
+                  "    pm.expect(inv.total_parts).to.be.a(\"number\");\r",
+                  "    pm.expect(inv.total_quantity).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "// Giá trị không âm\r",
+                  "pm.test(\"Inventory: giá trị không âm\", function () {\r",
+                  "    const inv = res.inventory;\r",
+                  "    Object.values(inv).forEach(v => {\r",
+                  "        if (typeof v === \"number\") {\r",
+                  "            pm.expect(v).to.be.at.least(0);\r",
+                  "        }\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// Kiểm tra REVENUE (month + today)\r",
+                  "// ===============================\r",
+                  "\r",
+                  "[\"month\", \"today\"].forEach(period => {\r",
+                  "    pm.test(`Kiểm tra revenue.${period}`, function () {\r",
+                  "        const r = res.revenue[period];\r",
+                  "        pm.expect(r).to.have.property(\"avg_transaction_value\");\r",
+                  "        pm.expect(r).to.have.property(\"payment_methods\");\r",
+                  "        pm.expect(r).to.have.property(\"period\");\r",
+                  "        pm.expect(r).to.have.property(\"total_revenue\");\r",
+                  "        pm.expect(r).to.have.property(\"transaction_count\");\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(`Kiểm tra kiểu dữ liệu revenue.${period}`, function () {\r",
+                  "        const r = res.revenue[period];\r",
+                  "        pm.expect(r.avg_transaction_value).to.be.a(\"number\");\r",
+                  "        pm.expect(r.payment_methods).to.be.an(\"object\");\r",
+                  "        pm.expect(r.period.start_date).to.be.a(\"string\");\r",
+                  "        pm.expect(r.period.end_date).to.be.a(\"string\");\r",
+                  "        pm.expect(r.total_revenue).to.be.a(\"number\");\r",
+                  "        pm.expect(r.transaction_count).to.be.a(\"number\");\r",
+                  "    });\r",
+                  "\r",
+                  "    // Kiểm tra format ngày\r",
+                  "    pm.test(`Kiểm tra format ngày revenue.${period}`, function () {\r",
+                  "        const r = res.revenue[period];\r",
+                  "        const dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;\r",
+                  "        pm.expect(r.period.start_date).to.match(dateRegex);\r",
+                  "        pm.expect(r.period.end_date).to.match(dateRegex);\r",
+                  "    });\r",
+                  "\r",
+                  "    // end_date >= start_date\r",
+                  "    pm.test(`Kiểm tra end_date >= start_date revenue.${period}`, function () {\r",
+                  "        const r = res.revenue[period];\r",
+                  "        const s = new Date(r.period.start_date);\r",
+                  "        const e = new Date(r.period.end_date);\r",
+                  "        pm.expect(e).to.be.at.least(s);\r",
+                  "    });\r",
+                  "\r",
+                  "    // Tổng doanh thu phải bằng avg * count\r",
+                  "    pm.test(`Kiểm tra total_revenue = avg * count (${period})`, function () {\r",
+                  "        const r = res.revenue[period];\r",
+                  "        pm.expect(r.total_revenue).to.equal(r.avg_transaction_value * r.transaction_count);\r",
+                  "    });\r",
+                  "\r",
+                  "    // Kiểm tra payment_methods: mỗi giá trị phải là number\r",
+                  "    pm.test(`Kiểm tra payment_methods revenue.${period}`, function () {\r",
+                  "        Object.values(res.revenue[period].payment_methods).forEach(v => {\r",
+                  "            pm.expect(v).to.be.a(\"number\");\r",
+                  "        });\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// Kiểm tra timestamp\r",
+                  "// ===============================\r",
+                  "pm.test(\"Kiểm tra timestamp dạng ISO 8601\", function () {\r",
+                  "    const isoRegex = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$/;\r",
+                  "    pm.expect(res.timestamp).to.match(isoRegex);\r",
+                  "});\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// Kiểm tra thời gian phản hồi\r",
+                  "// ===============================\r",
+                  "pm.test(\"Kiểm tra thời gian phản hồi < 1000ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/dashboard",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Check Health",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "//check status 200\r",
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "    });\r",
-              "\r",
-              "//check status User Service is running!\r",
-              "pm.test(\"Status message is correct\", function () {\r",
-              "    pm.expect(pm.response.json().status).to.eql(\"User Service is running!\");\r",
-              "    });\r",
-              "\r",
-              "pm.test(\"Response is JSON\", function () {\r",
-              "    pm.response.to.be.json;\r",
-              "    pm.expect(pm.response.json()).to.property(\"status\")\r",
+              "pm.test(\"Status field exists\", function () {\r",
+              "    pm.expect(pm.response.json()).to.have.property(\"status\");\r",
               "});\r",
               "\r",
-              ""
+              "pm.test(\"Status value is correct\", function () {\r",
+              "    const jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.status).to.eql(\"User Service is running!\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Response code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -47,461 +664,6 @@
           ],
           "path": [
             "health"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Access Token",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "//check status 200\r",
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});\r",
-              "//kiểm tra access_token\r",
-              "pm.test(\"Check access_token\",function(){\r",
-              "    pm.expect(pm.response.json().access_token).to.not.eql(null)\r",
-              "})\r",
-              "//Lấy và lưu access_token\r",
-              "let JsonData = pm.response.json();\r",
-              "pm.environment.set(\"access_token\",JsonData.access_token);\r",
-              "\r",
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"email_username\" : \"{{email_userName}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{localUrl}}/api/login",
-          "host": [
-            "{{localUrl}}"
-          ],
-          "path": [
-            "api",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Access Token Fail",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 401\", function () {\r",
-              "    pm.response.to.have.status(401);\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"email_username\" : \"{{email_userName}}\",\r\n    \"password\": \"Sai\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{localUrl}}/api/login",
-          "host": [
-            "{{localUrl}}"
-          ],
-          "path": [
-            "api",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Revenue Report",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "// Lấy token từ environment\r",
-              "const accessToken = pm.environment.get(\"access_token\");\r",
-              "// Thêm token vào header Authorization\r",
-              "pm.request.headers.add({\r",
-              "    key: \"Authorization\",\r",
-              "    value: `Bearer ${accessToken}`\r",
-              "});\r",
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "let jsonData = pm.response.json();\r",
-              "\r",
-              "// Status code\r",
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});\r",
-              "\r",
-              "//Check field tồn tại\r",
-              "pm.test(\"Response có đầy đủ field\", function () {\r",
-              "    pm.expect(jsonData).to.have.property(\"avg_transaction_value\");\r",
-              "    pm.expect(jsonData).to.have.property(\"payment_methods\");\r",
-              "    pm.expect(jsonData).to.have.property(\"period\");\r",
-              "    pm.expect(jsonData).to.have.property(\"total_revenue\");\r",
-              "    pm.expect(jsonData).to.have.property(\"transaction_count\");\r",
-              "});\r",
-              "\r",
-              "//Kiểu dữ liệu\r",
-              "pm.test(\"Data types correct\", function () {\r",
-              "    pm.expect(jsonData.avg_transaction_value).to.be.a(\"number\");\r",
-              "    pm.expect(jsonData.total_revenue).to.be.a(\"number\");\r",
-              "    pm.expect(jsonData.transaction_count).to.be.a(\"number\");\r",
-              "    pm.expect(jsonData.payment_methods).to.be.an(\"object\");\r",
-              "    pm.expect(jsonData.period).to.be.an(\"object\");\r",
-              "});\r",
-              "\r",
-              "// Period hợp lệ\r",
-              "pm.test(\"Period có start_date và end_date\", function () {\r",
-              "    pm.expect(jsonData.period).to.have.property(\"start_date\");\r",
-              "    pm.expect(jsonData.period).to.have.property(\"end_date\");\r",
-              "});\r",
-              "\r",
-              "//Logic thời gian\r",
-              "pm.test(\"start_date <= end_date\", function () {\r",
-              "    let start = new Date(jsonData.period.start_date);\r",
-              "    let end = new Date(jsonData.period.end_date);\r",
-              "\r",
-              "    pm.expect(end >= start).to.be.true;\r",
-              "});\r",
-              "\r",
-              "\r",
-              "// Response time\r",
-              "pm.test(\"Response time < 2s\", function () {\r",
-              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "protocolProfileBehavior": {
-        "disableBodyPruning": true
-      },
-      "request": {
-        "method": "GET",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}{{url_prefix}}/revenue?start_date=2024-01-01&end_date=2024-01-31",
-          "host": [
-            "{{baseUrl}}{{url_prefix}}"
-          ],
-          "path": [
-            "revenue"
-          ],
-          "query": [
-            {
-              "key": "start_date",
-              "value": "2024-01-01"
-            },
-            {
-              "key": "end_date",
-              "value": "2024-01-31"
-            }
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Inventory Report",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "// Lấy token từ environment\r",
-              "const accessToken = pm.environment.get(\"access_token\");\r",
-              "// Thêm token vào header Authorization\r",
-              "pm.request.headers.add({\r",
-              "    key: \"Authorization\",\r",
-              "    value: `Bearer ${accessToken}`\r",
-              "});\r",
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "let jsonData = pm.response.json();\r",
-              "\r",
-              "//Status code\r",
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});\r",
-              "\r",
-              "//Check field tồn tại\r",
-              "pm.test(\"Có đầy đủ field\", function () {\r",
-              "    pm.expect(jsonData).to.have.property(\"low_stock_count\");\r",
-              "    pm.expect(jsonData).to.have.property(\"low_stock_parts\");\r",
-              "    pm.expect(jsonData).to.have.property(\"out_of_stock_count\");\r",
-              "    pm.expect(jsonData).to.have.property(\"out_of_stock_parts\");\r",
-              "    pm.expect(jsonData).to.have.property(\"total_inventory_value\");\r",
-              "    pm.expect(jsonData).to.have.property(\"total_parts\");\r",
-              "    pm.expect(jsonData).to.have.property(\"total_quantity\");\r",
-              "});\r",
-              "\r",
-              "//Kiểu dữ liệu\r",
-              "pm.test(\"Data types đúng\", function () {\r",
-              "    pm.expect(jsonData.low_stock_count).to.be.a(\"number\");\r",
-              "    pm.expect(jsonData.out_of_stock_count).to.be.a(\"number\");\r",
-              "    pm.expect(jsonData.total_inventory_value).to.be.a(\"number\");\r",
-              "    pm.expect(jsonData.total_parts).to.be.a(\"number\");\r",
-              "    pm.expect(jsonData.total_quantity).to.be.a(\"number\");\r",
-              "\r",
-              "    pm.expect(jsonData.low_stock_parts).to.be.an(\"array\");\r",
-              "    pm.expect(jsonData.out_of_stock_parts).to.be.an(\"array\");\r",
-              "});\r",
-              "\r",
-              "\r",
-              "// Logic consistency\r",
-              "pm.test(\"Count = length của array\", function () {\r",
-              "    pm.expect(jsonData.low_stock_count).to.eql(jsonData.low_stock_parts.length);\r",
-              "    pm.expect(jsonData.out_of_stock_count).to.eql(jsonData.out_of_stock_parts.length);\r",
-              "});\r",
-              "\r",
-              "//Không có số âm\r",
-              "pm.test(\"Không có giá trị âm\", function () {\r",
-              "    pm.expect(jsonData.total_parts).to.be.at.least(0);\r",
-              "    pm.expect(jsonData.total_quantity).to.be.at.least(0);\r",
-              "    pm.expect(jsonData.total_inventory_value).to.be.at.least(0);\r",
-              "});\r",
-              "\r",
-              "// Performance\r",
-              "pm.test(\"Response time < 2s\", function () {\r",
-              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}{{url_prefix}}/inventory",
-          "host": [
-            "{{baseUrl}}{{url_prefix}}"
-          ],
-          "path": [
-            "inventory"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Dashboard",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "// Lấy token từ environment\r",
-              "const accessToken = pm.environment.get(\"access_token\");\r",
-              "// Thêm token vào header Authorization\r",
-              "pm.request.headers.add({\r",
-              "    key: \"Authorization\",\r",
-              "    value: `Bearer ${accessToken}`\r",
-              "});\r",
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "let jsonData = pm.response.json();\r",
-              "\r",
-              "//Status code\r",
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "});\r",
-              "\r",
-              "// =======================\r",
-              "//BOOKINGS\r",
-              "// =======================\r",
-              "pm.test(\"Bookings structure đúng\", function () {\r",
-              "    let b = jsonData.bookings;\r",
-              "\r",
-              "    pm.expect(b).to.have.property(\"completed\");\r",
-              "    pm.expect(b).to.have.property(\"confirmed\");\r",
-              "    pm.expect(b).to.have.property(\"pending\");\r",
-              "    pm.expect(b).to.have.property(\"total\");\r",
-              "});\r",
-              "\r",
-              "// Kiểu dữ liệu\r",
-              "pm.test(\"Bookings data types\", function () {\r",
-              "    let b = jsonData.bookings;\r",
-              "\r",
-              "    pm.expect(b.completed).to.be.a(\"number\");\r",
-              "    pm.expect(b.confirmed).to.be.a(\"number\");\r",
-              "    pm.expect(b.pending).to.be.a(\"number\");\r",
-              "    pm.expect(b.total).to.be.a(\"number\");\r",
-              "});\r",
-              "\r",
-              "// Logic \r",
-              "pm.test(\"Bookings total = sum\", function () {\r",
-              "    let b = jsonData.bookings;\r",
-              "\r",
-              "    pm.expect(b.total).to.eql(b.completed + b.confirmed + b.pending);\r",
-              "});\r",
-              "\r",
-              "// =======================\r",
-              "//INVENTORY\r",
-              "// =======================\r",
-              "let inv = jsonData.inventory;\r",
-              "\r",
-              "pm.test(\"Inventory structure đúng\", function () {\r",
-              "    pm.expect(inv.low_stock_parts).to.be.an(\"array\");\r",
-              "    pm.expect(inv.out_of_stock_parts).to.be.an(\"array\");\r",
-              "});\r",
-              "\r",
-              "// Logic count = length\r",
-              "pm.test(\"Inventory count đúng\", function () {\r",
-              "    pm.expect(inv.low_stock_count).to.eql(inv.low_stock_parts.length);\r",
-              "    pm.expect(inv.out_of_stock_count).to.eql(inv.out_of_stock_parts.length);\r",
-              "});\r",
-              "\r",
-              "// =======================\r",
-              "//REVENUE\r",
-              "// =======================\r",
-              "[\"today\", \"month\"].forEach(periodKey => {\r",
-              "    let r = jsonData.revenue[periodKey];\r",
-              "\r",
-              "    pm.test(`Revenue ${periodKey} structure`, function () {\r",
-              "        pm.expect(r).to.have.property(\"total_revenue\");\r",
-              "        pm.expect(r).to.have.property(\"transaction_count\");\r",
-              "        pm.expect(r).to.have.property(\"avg_transaction_value\");\r",
-              "        pm.expect(r).to.have.property(\"payment_methods\");\r",
-              "        pm.expect(r).to.have.property(\"period\");\r",
-              "    });\r",
-              "\r",
-              "    // Kiểu dữ liệu\r",
-              "    pm.test(`Revenue ${periodKey} types`, function () {\r",
-              "        pm.expect(r.total_revenue).to.be.a(\"number\");\r",
-              "        pm.expect(r.transaction_count).to.be.a(\"number\");\r",
-              "        pm.expect(r.avg_transaction_value).to.be.a(\"number\");\r",
-              "        pm.expect(r.payment_methods).to.be.an(\"object\");\r",
-              "    });\r",
-              "\r",
-              "    // Check thời gian\r",
-              "    pm.test(`Revenue ${periodKey} date hợp lệ`, function () {\r",
-              "        let start = new Date(r.period.start_date);\r",
-              "        let end = new Date(r.period.end_date);\r",
-              "\r",
-              "        pm.expect(end >= start).to.be.true;\r",
-              "    });\r",
-              "});\r",
-              "\r",
-              "// =======================\r",
-              "// TIMESTAMP\r",
-              "// =======================\r",
-              "pm.test(\"Timestamp tồn tại\", function () {\r",
-              "    pm.expect(jsonData.timestamp).to.exist;\r",
-              "});\r",
-              "\r",
-              "// =======================\r",
-              "// PERFORMANCE\r",
-              "// =======================\r",
-              "pm.test(\"Response time < 2s\", function () {\r",
-              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}{{url_prefix}}/dashboard?start_date=2026-01-01&end_date=2026-12-31",
-          "host": [
-            "{{baseUrl}}{{url_prefix}}"
-          ],
-          "path": [
-            "dashboard"
-          ],
-          "query": [
-            {
-              "key": "start_date",
-              "value": "2026-01-01"
-            },
-            {
-              "key": "end_date",
-              "value": "2026-12-31"
-            }
           ]
         }
       },
