@@ -5,7 +5,6 @@ internal_bp = Blueprint("internal_inventory", __name__, url_prefix="/internal/pa
 
 @internal_bp.before_request
 def verify_internal_token():
-    """Xác thực Internal Service Token"""
     token = request.headers.get("X-Internal-Token")
     expected_token = current_app.config.get("INTERNAL_SERVICE_TOKEN")
     
@@ -14,6 +13,27 @@ def verify_internal_token():
 
 @internal_bp.route("/all", methods=["GET"])
 def get_all_parts():
-    """Lấy tất cả parts (cho report-service)"""
     parts = InventoryService.get_all_parts()
     return jsonify([p.to_dict() for p in parts]), 200
+
+
+# THÊM MỚI
+@internal_bp.route("/<int:item_id>/deduct", methods=["PUT"])
+def deduct_part_quantity(item_id):
+    data = request.get_json() or {}
+    quantity_to_deduct = data.get("quantity_to_deduct")
+
+    if quantity_to_deduct is None:
+        return jsonify({"error": "Missing quantity_to_deduct"}), 400
+
+    item, error = InventoryService.update_item(item_id, {
+        "quantity_to_deduct": quantity_to_deduct
+    })
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    return jsonify({
+        "message": "Deduct inventory successfully",
+        "item": item.to_dict()
+    }), 200

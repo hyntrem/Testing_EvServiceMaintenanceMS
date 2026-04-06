@@ -63,12 +63,15 @@ class FinanceService:
         return FinanceService._call_internal_api(maintenance_url, f"/api/maintenance/bookings/{booking_id}/parts")
 
     @staticmethod
-    def _update_inventory_quantity(item_id, new_quantity):
-        """Cập nhật tồn kho bằng cách gọi PUT Inventory Service (dùng Internal Token)"""
+    def _deduct_inventory_quantity(item_id, quantity_to_deduct):
         inventory_url = current_app.config.get("INVENTORY_SERVICE_URL")
-        endpoint = f"/api/inventory/items/{item_id}"
-        return FinanceService._call_internal_api(inventory_url, endpoint, "PUT", {"quantity": new_quantity})
-
+        endpoint = f"/internal/parts/{item_id}/deduct"
+        return FinanceService._call_internal_api(
+            inventory_url,
+            endpoint,
+            "PUT",
+            {"quantity_to_deduct": quantity_to_deduct}
+        )
     @staticmethod
     def initiate_payment(invoice_id, method, user_id):
         """Bắt đầu thanh toán, gọi Payment Service để tạo giao dịch"""
@@ -168,14 +171,12 @@ class FinanceService:
                     return None, f"Lỗi: Không tìm thấy phụ tùng ID {item_id} hoặc Inventory Service lỗi."
                 
                 current_quantity = inventory_item.get('quantity', 0)
-                new_quantity = current_quantity - quantity
 
-                if new_quantity < 0:
+                if current_quantity < quantity:
                     db.session.rollback()
                     return None, f"Lỗi: Tồn kho cho phụ tùng ID {item_id} không đủ. Cần {quantity}, hiện có {current_quantity}."
 
-                # GỌI API ĐỂ TRỪ TỒN KHO THỰC TẾ
-                update_response, update_error = FinanceService._update_inventory_quantity(item_id, new_quantity)
+                update_response, update_error = FinanceService._deduct_inventory_quantity(item_id, quantity)
 
                 if update_error:
                     db.session.rollback()

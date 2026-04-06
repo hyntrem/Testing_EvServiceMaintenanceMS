@@ -200,10 +200,12 @@ class MaintenanceService:
 
     @staticmethod
     def get_task_parts_by_booking_id(booking_id):
-        task = MaintenanceTask.query.filter_by(booking_id=booking_id).first()
-        if not task:
-            return None, "Task không tồn tại cho booking này"
-        parts = TaskPart.query.filter_by(task_id=task.task_id).all()
+        tasks = MaintenanceTask.query.filter_by(booking_id=booking_id).all()
+        if not tasks:
+            return [], None
+
+        task_ids = [t.task_id for t in tasks]
+        parts = TaskPart.query.filter(TaskPart.task_id.in_(task_ids)).all()
         return [p.to_dict() for p in parts], None
 
     # ============= Checklist Methods =============
