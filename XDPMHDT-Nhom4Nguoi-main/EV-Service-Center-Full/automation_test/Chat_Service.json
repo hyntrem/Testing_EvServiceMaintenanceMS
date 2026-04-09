@@ -937,7 +937,7 @@
           "response": []
         },
         {
-          "name": "6 Closed",
+          "name": "6 GetClosed",
           "event": [
             {
               "listen": "test",
@@ -1044,7 +1044,7 @@
           "response": []
         },
         {
-          "name": "6.1 Closed (no rooms)",
+          "name": "6.1 GetClosed (no rooms)",
           "event": [
             {
               "listen": "test",
@@ -1100,7 +1100,7 @@
       "name": "Message",
       "item": [
         {
-          "name": "Messagese Room",
+          "name": "7 Messagese",
           "event": [
             {
               "listen": "test",
@@ -1190,7 +1190,86 @@
           "response": []
         },
         {
-          "name": "Read",
+          "name": "7.1 Messagese (room_id not initialized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Rooms is empty\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.messages.length).to.eql(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/999/messages",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "999",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.2 Messagese (missing room_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response body contains '404 Not Found'\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('404 Not Found');\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/messages",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8 Read",
           "event": [
             {
               "listen": "test",
@@ -1244,6 +1323,193 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "8.1 Read (missing user_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "    });\r",
+                  "\r",
+                  "//Check response\r",
+                  "pm.test(\"Response body contains error message\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"Missing user_id\");\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/read",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "{{Room_ID}}",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.2 Read (user_id not initialized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "    });\r",
+                  "\r",
+                  "//check success\r",
+                  "pm.test(\"Success is true\", function () {\r",
+                  "    pm.response.to.have.jsonBody('success', true);\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"user_id\": \"999\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/read",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "{{Room_ID}}",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.3 Read (missing room_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response body contains '404 Not Found'\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('404 Not Found');\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"user_id\": \"{{user_id}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/read",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.4 Read (room_id not initialized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 415\", function () {\r",
+                  "    pm.response.to.have.status(415);\r",
+                  "    });\r",
+                  "pm.test(\"Response is HTML\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"<!doctype html>\");\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/999/read",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "999",
+                "read"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -1251,7 +1517,7 @@
       "name": "Admin",
       "item": [
         {
-          "name": "Admin Assign",
+          "name": "9 Assign",
           "event": [
             {
               "listen": "prerequest",
@@ -1367,7 +1633,305 @@
           "response": []
         },
         {
-          "name": "Closed Room",
+          "name": "9.1 Assign (missing room_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "    });\r",
+                  "\r",
+                  "pm.test(\"Response body contains '404 Not Found'\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('404 Not Found');\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"support_user_id\": \"{{Id_Admin}}\",\r\n  \"support_user_name\": \"Admin\",\r\n  \"support_role\": \"Admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/assign",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9.2 Assign (room_id not initialized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// check status\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "    });\r",
+                  "\r",
+                  "//check response\r",
+                  "pm.test(\"Response body contains error message\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"Room not found\");\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"support_user_id\": \"{{Id_Admin}}\",\r\n  \"support_user_name\": \"Admin\",\r\n  \"support_role\": \"Admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/999/assign",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "999",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9.3 Assign (missing support_user_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "    });\r",
+                  "\r",
+                  "//check error\r",
+                  "pm.test(\"Error message is 'Missing support user information'\", function () {\r",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Missing support user information\");\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"support_user_name\": \"Admin\",\r\n  \"support_role\": \"Admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "{{Room_ID}}",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9.4 Assign (missing support_user_name)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "    });\r",
+                  "\r",
+                  "//check error\r",
+                  "pm.test(\"Error message is 'Missing support user information'\", function () {\r",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Missing support user information\");\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"support_user_id\": \"{{Id_Admin}}\",\r\n  \"support_role\": \"Admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "{{Room_ID}}",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9.5 Assign (missing support_role)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "    });\r",
+                  "\r",
+                  "//check error\r",
+                  "pm.test(\"Error message is 'Missing support user information'\", function () {\r",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Missing support user information\");\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"support_user_id\": \"{{Id_Admin}}\",\r\n  \"support_user_name\": \"Admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "{{Room_ID}}",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9.6 Assign (missing body)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 400\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "    });\r",
+                  "\r",
+                  "//check error\r",
+                  "pm.test(\"Error message is 'Missing support user information'\", function () {\r",
+                  "    pm.expect(pm.response.json().error).to.eql(\"Missing support user information\");\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "{{Room_ID}}",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10 ClosedRoom",
           "event": [
             {
               "listen": "test",
@@ -1459,661 +2023,90 @@
             }
           },
           "response": []
-        }
-      ]
-    },
-    {
-      "name": "Negative",
-      "item": [
-        {
-          "name": "Room",
-          "item": [
-            {
-              "name": "Create missing us_id",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//Status code\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "});\r",
-                      "\r",
-                      "pm.test(\"Missing user_id or user_name\", function(){\r",
-                      "    pm.expect(pm.response.json().error).to.eql(\"Missing user_id or user_name\");\r",
-                      "})"
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n\r\n  \"user_name\": \"user_name\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Create missing us_name",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//Status code\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "});\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"user_id\": \"{{user_id}}\"\r\n\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Create missing all",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//Status code\r",
-                      "pm.test(\"Status code is 415\", function () {\r",
-                      "    pm.response.to.have.status(415);\r",
-                      "});\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Detail does not exist Room_id",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "// kiem tra trangj thai\r",
-                      "pm.test(\"Status code is 404\", function () {\r",
-                      "        pm.response.to.have.status(404);\r",
-                      "        });\r",
-                      "        "
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/9999",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "9999"
-                  ]
-                }
-              },
-              "response": []
-            }
-          ]
         },
         {
-          "name": "Message",
-          "item": [
+          "name": "10.1 ClosedRoom (room_id not initialized)",
+          "event": [
             {
-              "name": "Message does not exist room_id",
-              "request": {
-                "method": "GET",
-                "header": []
-              },
-              "response": []
-            },
-            {
-              "name": "Read missing user_id",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 415\", function () {\r",
-                      "    pm.response.to.have.status(415);\r",
-                      "    });\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/read",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "read"
-                  ]
-                }
-              },
-              "response": []
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "    });\r",
+                  "\r",
+                  "//check response\r",
+                  "pm.test(\"Response body contains error message\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include(\"Room not found\");\r",
+                  "    });\r",
+                  "    "
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          ]
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/999/close",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "999",
+                "close"
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "name": "Admin",
-          "item": [
+          "name": "10.2 ClosedRoom (missing room_id)",
+          "event": [
             {
-              "name": "Missing support_user_id",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "    });\r",
-                      "\r",
-                      "pm.test(\"Missing support user information\",function(){\r",
-                      "    pm.expect(pm.response.json().error).to.eql(\"Missing support user information\");\r",
-                      "})"
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"support_user_name\": \"Admin\",\r\n  \"support_role\": \"Admin\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "assign"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Missing support_user_name",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "    });\r",
-                      "\r",
-                      "pm.test(\"Missing support user information\",function(){\r",
-                      "    pm.expect(pm.response.json().error).to.eql(\"Missing support user information\");\r",
-                      "})"
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"support_user_id\": \"{{user_id}}\",\r\n\r\n  \"support_role\": \"Admin\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "assign"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Missing support_role",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "    });\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"support_user_id\": \"{{user_id}}\",\r\n  \"support_user_name\": \"Admin\"\r\n\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "assign"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Support missing id name",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "    });\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n\r\n  \"support_role\": \"Admin\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "assign"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Support missing id role",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "    });\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n\r\n  \"support_user_name\": \"Admin\"\r\n\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "assign"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Support missing name role",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 400\", function () {\r",
-                      "    pm.response.to.have.status(400);\r",
-                      "    });\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n  \"support_user_id\": \"{{Id_Admin}}\"\r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "assign"
-                  ]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Support missing all",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "//check status 200\r",
-                      "pm.test(\"Status code is 415\", function () {\r",
-                      "    pm.response.to.have.status(415);\r",
-                      "    });\r",
-                      "\r",
-                      ""
-                    ],
-                    "type": "text/javascript",
-                    "packages": {},
-                    "requests": {}
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\r\n    \r\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}{{url_prefix}}/rooms/{{Room_ID}}/assign",
-                  "host": [
-                    "{{baseUrl}}{{url_prefix}}"
-                  ],
-                  "path": [
-                    "rooms",
-                    "{{Room_ID}}",
-                    "assign"
-                  ]
-                }
-              },
-              "response": []
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//check status\r",
+                  "pm.test(\"Status code is 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "    });\r",
+                  "\r",
+                  "//check response\r",
+                  "pm.test(\"Response body contains 'Not Found'\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.include('Not Found');\r",
+                  "    });\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          ]
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{url_prefix}}/rooms/close",
+              "host": [
+                "{{baseUrl}}{{url_prefix}}"
+              ],
+              "path": [
+                "rooms",
+                "close"
+              ]
+            }
+          },
+          "response": []
         }
       ]
-    },
-    {
-      "name": "Check Health",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.expect(pm.response.code).to.equal(200);\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Response JSON has required fields\", function () {\r",
-              "    const res = pm.response.json();\r",
-              "\r",
-              "    pm.expect(res).to.have.property(\"service\");\r",
-              "    pm.expect(res).to.have.property(\"status\");\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Service should be chat-service\", function () {\r",
-              "    const res = pm.response.json();\r",
-              "    pm.expect(res.service).to.equal(\"chat-service\");\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Status should be healthy\", function () {\r",
-              "    const res = pm.response.json();\r",
-              "    pm.expect(res.status).to.equal(\"healthy\");\r",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "health"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "User does not exist us_id",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "//kiem tra trang thai\r",
-              "pm.test(\"Status code is 200\", function () {\r",
-              "    pm.response.to.have.status(200);\r",
-              "    });"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}{{url_prefix}}/rooms/user/999",
-          "host": [
-            "{{baseUrl}}{{url_prefix}}"
-          ],
-          "path": [
-            "rooms",
-            "user",
-            "999"
-          ]
-        }
-      },
-      "response": []
     }
   ]
 }
