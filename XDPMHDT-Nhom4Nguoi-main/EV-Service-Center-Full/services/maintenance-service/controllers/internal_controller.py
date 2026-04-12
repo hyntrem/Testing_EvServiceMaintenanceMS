@@ -4,93 +4,68 @@ Internal API Controller for Maintenance Service
 """
 
 from flask import Blueprint, request, jsonify, current_app
+import os
 from datetime import datetime, timedelta
 from functools import wraps
 
 from services.maintenance_service import MaintenanceService as service
 
 internal_bp = Blueprint("internal", __name__, url_prefix="/internal/maintenance")
-
-
 def internal_token_required(f):
-    """Decorator to verify internal service token"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = request.headers.get('X-Internal-Token')
-        expected_token = current_app.config.get('INTERNAL_SERVICE_TOKEN')
+        token = request.headers.get("X-Internal-Token")
+        expected_token = current_app.config.get("INTERNAL_SERVICE_TOKEN")
 
-        if not token or token != expected_token:
+        # DEBUG LOG (rất quan trọng)
+        current_app.logger.info(f"Received token: {token}")
+        current_app.logger.info(f"Expected token: {expected_token}")
+
+        if not token or not expected_token:
+            return jsonify({
+                "success": False,
+                "error": "Missing internal token"
+            }), 401
+
+        # FIX: remove "Bearer "
+        if token.startswith("Bearer "):
+            token = token.replace("Bearer ", "")
+
+        # FIX: strip space
+        if token.strip() != expected_token.strip():
             return jsonify({
                 "success": False,
                 "error": "Unauthorized - Invalid internal token"
             }), 401
 
         return f(*args, **kwargs)
-    return decorated_function
 
+    return decorated_function
 
 @internal_bp.route("/due-soon", methods=["GET"])
 @internal_token_required
 def get_maintenance_due_soon():
-    """
-    Lấy danh sách xe/task cần bảo dưỡng sớm
-
-    Logic nhắc nhở:
-    - Nhắc trước 7 ngày nếu có scheduled_date
-    - Nhắc khi gần hoàn thành task (status = in_progress và sắp xong)
-
-    Returns:
-        {
-            "success": true,
-            "maintenances": [
-                {
-                    "id": 1,
-                    "user_id": 123,
-                    "vehicle_info": {
-                        "license_plate": "30A-12345",
-                        "brand": "VinFast",
-                        "model": "VF8"
-                    },
-                    "due_date": "2025-12-01T00:00:00",
-                    "task_type": "Bảo dưỡng định kỳ",
-                    "description": "Kiểm tra hệ thống điện"
-                }
-            ]
-        }
-    """
     try:
-        # Tính ngày nhắc nhở (7 ngày trước)
-        remind_date = datetime.now() + timedelta(days=7)
-
         maintenances = []
-
-        # Lấy tất cả tasks có scheduled_date trong 7 ngày tới
-        all_tasks = service.get_all_tasks()  # Giả sử có method này
+        all_tasks = service.get_all_tasks()
 
         for task in all_tasks:
-            # Chỉ nhắc cho tasks chưa hoàn thành
             if task.status in ['completed', 'cancelled']:
                 continue
 
-            # Kiểm tra scheduled_date
-            if task.scheduled_date:
-                scheduled = datetime.fromisoformat(str(task.scheduled_date)) if isinstance(task.scheduled_date, str) else task.scheduled_date
-
-                # Nhắc nếu trong vòng 7 ngày tới
-                if datetime.now() <= scheduled <= remind_date:
-                    maintenances.append({
-                        "id": task.id,
-                        "user_id": task.user_id,
-                        "vehicle_info": {
-                            "license_plate": task.license_plate or "N/A",
-                            "brand": task.brand or "N/A",
-                            "model": task.model or "N/A"
-                        },
-                        "due_date": scheduled.isoformat(),
-                        "task_type": task.task_type or "Bảo dưỡng",
-                        "description": task.description or "Kiểm tra định kỳ",
-                        "status": task.status
-                    })
+            maintenances.append({
+                "id": task.task_id,
+                "user_id": task.user_id,
+                "vehicle_info": {
+                    "license_plate": "N/A",
+                    "brand": "N/A",
+                    "model": task.vehicle_vin or "N/A"
+                },
+                "due_date": task.created_at.isoformat() if task.created_at else None,
+                "task_type": "Bảo dưỡng",
+                "description": task.description or "Kiểm tra định kỳ",
+                "status": task.status
+            })
 
         return jsonify({
             "success": True,
@@ -109,15 +84,6 @@ def get_maintenance_due_soon():
 @internal_bp.route("/task/<int:task_id>/info", methods=["GET"])
 @internal_token_required
 def get_task_info(task_id):
-    """
-    Lấy thông tin chi tiết của một task (cho notification service)
-
-    Args:
-        task_id: ID của maintenance task
-
-    Returns:
-        Task information
-    """
     try:
         task = service.get_task_by_id(task_id)
 
@@ -130,19 +96,14 @@ def get_task_info(task_id):
         return jsonify({
             "success": True,
             "task": {
-                "id": task.id,
+                "task_id": task.task_id,
                 "user_id": task.user_id,
                 "technician_id": task.technician_id,
-                "license_plate": task.license_plate,
-                "brand": task.brand,
-                "model": task.model,
-                "task_type": task.task_type,
+                "vehicle_vin": task.vehicle_vin,
                 "description": task.description,
                 "status": task.status,
-                "priority": task.priority,
-                "scheduled_date": task.scheduled_date.isoformat() if task.scheduled_date else None,
-                "completed_date": task.completed_date.isoformat() if task.completed_date else None,
-                "created_at": task.created_at.isoformat() if task.created_at else None
+                "created_at": task.created_at.isoformat() if task.created_at else None,
+                "updated_at": task.updated_at.isoformat() if task.updated_at else None
             }
         }), 200
 
