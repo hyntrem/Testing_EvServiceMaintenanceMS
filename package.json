@@ -1,0 +1,27 @@
+{
+  "name": "testing_evservicemaintenancems",
+  "version": "1.0.0",
+  "description": "Dự án kiểm thử - EV service center maintenance management system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyntrem/Testing_EvServiceMaintenanceMS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hyntrem/Testing_EvServiceMaintenanceMS/issues"
+  },
+  "homepage": "https://github.com/hyntrem/Testing_EvServiceMaintenanceMS#readme",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "codeceptjs": "^3.7.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}
