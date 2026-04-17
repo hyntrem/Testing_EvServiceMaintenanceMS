@@ -1,20 +1,18 @@
 import { setHeadlessWhen, setCommonPlugins } from "@codeceptjs/configure";
-// turn on headless mode when running with HEADLESS=true environment variable
-// export HEADLESS=true && npx codeceptjs run
-setHeadlessWhen(process.env.HEADLESS);
+import * as dotenv from "dotenv";
 
-// enable all common plugins https://github.com/codeceptjs/configure#setcommonplugins
+dotenv.config({ path: ".env.test" });
+
+setHeadlessWhen(process.env.HEADLESS);
 setCommonPlugins();
 
 export const config: CodeceptJS.MainConfig = {
-  tests: "./tests",
+  tests: "./tests/**/*_test.js",
   output: "./output",
   helpers: {
     REST: {
-      endpoint: "http://localhost:8001",
+      endpoint: process.env.BASE_URL || "http://localhost",
       defaultHeaders: {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NjAwMDQ3NCwianRpIjoiNGRhZGI4NDktZWI3Zi00ZWZmLWJkMWItNjkwYjgzNGEzNjk1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NzYwMDA0NzQsImNzcmYiOiIwM2Y4NjI3NS0wYzQzLTQ5MmEtODM5Zi04NTgwYzI3NzVmMGUiLCJleHAiOjE3NzY2MDUyNzQsInJvbGUiOiJhZG1pbiJ9.HRibYyeOGtQhRVUSXiiabHncqGpCa4hYRa85QMjmxLo",
         "Content-Type": "application/json",
       },
     },
