@@ -1,0 +1,20 @@
+{
+  "name": "ev-service-center-full",
+  "version": "1.0.0",
+  "description": "docker-compose up -d --force-recreate listing-service\r docker-compose up -d --build frontend\r docker-compose down -v\r \"\\\\wsl.localhost\\docker-desktop\\mnt\\docker-desktop-disk\\data\\docker\\volumes\\second-handevbatterytradingplatform_listing_uploads_data\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "codeceptjs": "^3.7.8",
+    "playwright": "^1.59.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
