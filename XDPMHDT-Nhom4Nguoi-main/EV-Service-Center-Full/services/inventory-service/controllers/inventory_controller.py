@@ -5,19 +5,34 @@ from flask_jwt_extended import jwt_required
 inventory_bp = Blueprint("inventory", __name__, url_prefix="/api/inventory")
 
 # ✅ 1. CREATE ITEM (POST /api/inventory/items)
+
 @inventory_bp.route("/items", methods=["POST"])
+
 @jwt_required()
+
 def create_item():
+
     data = request.get_json()
+
     required_fields = ["name", "part_number", "price"]
 
+
+
     if not data or not all(k in data for k in required_fields):
+
         return jsonify({"error": f"Missing required fields: {', '.join(required_fields)}"}), 400
 
+
+
     # Service sẽ tự xử lý center_id (mặc định là 1 nếu thiếu)
+
     item, error = service.create_item(data)
+
     if error:
+
         return jsonify({"error": error}), 409
+
+
 
     return jsonify({"message": "Item created successfully", "item": item.to_dict()}), 201
 
@@ -52,13 +67,25 @@ def get_item(item_id):
 @jwt_required()
 def update_item(item_id):
     data = request.get_json()
-    item, error = service.update_item(item_id, data)
-    
-    if error:
-        return jsonify({"error": error}), 404
-    
-    return jsonify({"message": "Item updated successfully", "item": item.to_dict()}), 200
 
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    item, error = service.update_item(item_id, data)
+
+    # ❌ Không tìm thấy
+    if error == "Không tìm thấy vật tư":
+        return jsonify({"error": error}), 404
+
+    # ❌ Lỗi validate (name rỗng, quantity âm,...)
+    if error:
+        return jsonify({"error": error}), 400
+
+    # ✅ Thành công
+    return jsonify({
+        "message": "Item updated successfully",
+        "item": item.to_dict()
+    }), 200
 # ✅ 6. DELETE ITEM (DELETE /api/inventory/items/<int:item_id>)
 @inventory_bp.route("/items/<int:item_id>", methods=["DELETE"])
 @jwt_required()
