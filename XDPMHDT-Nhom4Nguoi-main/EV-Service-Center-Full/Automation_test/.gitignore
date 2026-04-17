@@ -1,0 +1,21 @@
+# Dependencies - chỉ cài 1 lần ở root
+node_modules/
+
+# ENV thật - KHÔNG bao giờ commit
+**/.env
+
+# Output của từng service
+**/output/
+**/allure-results/
+**/mochawesome-report/
+
+# Lock files của sub-folder (chỉ dùng lock ở root)
+**/package-lock.json
+
+# TypeScript build
+**/dist/
+**/*.js.map
+
+# OS
+.DS_Store
+Thumbs.db
