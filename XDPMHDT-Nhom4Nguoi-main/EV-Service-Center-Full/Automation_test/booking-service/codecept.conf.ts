@@ -1,29 +1,31 @@
-import { setHeadlessWhen, setCommonPlugins } from '@codeceptjs/configure';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: __dirname + '/.env' });
+import { setHeadlessWhen, setCommonPlugins } from "@codeceptjs/configure";
+import * as dotenv from "dotenv";
 
-setHeadlessWhen(process.env.HEADLESS === 'true');
+dotenv.config();
 
-export const config: CodeceptJS.MainConfig = {
-  name: 'booking-service',
-  tests: './tests/**/*_test.js',
-  output: './output',
+setHeadlessWhen(process.env.HEADLESS === "true");
+setCommonPlugins();
+
+export const config = {
+  name: "booking-service",
+  tests: "./tests/**/*_test.js",
+  output: "./output",
 
   helpers: {
     REST: {
-      endpoint: process.env.BASE_URL || 'http://localhost:8001',
+      endpoint: process.env.BASE_URL || "http://localhost:8001",
       defaultHeaders: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
     },
     BaseHelper: {
-      require: '../../_shared/helpers/BaseHelper.js',
+      require: "../_shared/helpers/BaseHelper.js",
     },
   },
 
   include: {
-    I: './steps_file.ts',
+    I: "./steps_file.ts",
   },
 
   plugins: {
@@ -33,7 +35,7 @@ export const config: CodeceptJS.MainConfig = {
     },
     screenshotOnFail: {
       enabled: true,
-      path: './output/screenshots',
+      path: "./output/screenshots",
     },
   },
 };

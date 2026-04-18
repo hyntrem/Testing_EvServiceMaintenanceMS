@@ -6,7 +6,13 @@ Scenario("Get service centers - success", async ({ I }) => {
   console.log("status:", response.status);
   console.log("body:", response.data);
 
-  I.seeResponseCodeIsSuccessful();
+  if (response.status !== 200) {
+    throw new Error(`Expected 200, got ${response.status}`);
+  }
+
+  if (!response.data) {
+    throw new Error("Response body is empty");
+  }
 });
 
 Scenario("Get service centers - empty list", async ({ I }) => {
@@ -15,5 +21,12 @@ Scenario("Get service centers - empty list", async ({ I }) => {
   console.log("empty status:", response.status);
   console.log("empty body:", response.data);
 
-  I.seeResponseCodeIsSuccessful();
+  if (response.status !== 200) {
+    throw new Error(`Expected 200, got ${response.status}`);
+  }
+
+  // chấp nhận array rỗng hoặc có data
+  if (!Array.isArray(response.data) && !response.data?.centers) {
+    console.warn("Response is not array or centers object, check API format");
+  }
 });
