@@ -4,24 +4,25 @@
   "private": true,
   "description": "CodeceptJS tests for all microservices",
   "scripts": {
-    "test:user":          "cd tests-restructured/user-service && npx codeceptjs run --steps",
-    "test:booking":       "cd tests-restructured/booking-service && npx codeceptjs run --steps",
-    "test:inventory":     "cd tests-restructured/inventory-service && npx codeceptjs run --steps",
-    "test:finance":       "cd tests-restructured/finance-service && npx codeceptjs run --steps",
-    "test:notification":  "cd tests-restructured/notification-service && npx codeceptjs run --steps",
-    "test:maintenance":   "cd tests-restructured/maintenance-service && npx codeceptjs run --steps",
-    "test:payment":       "cd tests-restructured/payment-service && npx codeceptjs run --steps",
-    "test:report":        "cd tests-restructured/report-service && npx codeceptjs run --steps",
-    "test:chat":          "cd tests-restructured/chat-service && npx codeceptjs run --steps",
-    "test:staff":         "cd tests-restructured/staff-service && npx codeceptjs run --steps",
-    "test:frontend":      "cd tests-restructured/frontend && npx codeceptjs run --steps",
-    "test:all":           "bash scripts/run-all-tests.sh"
+    "test:user": "cd tests-restructured/user-service && npx codeceptjs run --steps",
+    "test:booking": "cd tests-restructured/booking-service && npx codeceptjs run --steps",
+    "test:inventory": "cd tests-restructured/inventory-service && npx codeceptjs run --steps",
+    "test:finance": "cd tests-restructured/finance-service && npx codeceptjs run --steps",
+    "test:notification": "cd tests-restructured/notification-service && npx codeceptjs run --steps",
+    "test:maintenance": "cd tests-restructured/maintenance-service && npx codeceptjs run --steps",
+    "test:payment": "cd tests-restructured/payment-service && npx codeceptjs run --steps",
+    "test:report": "cd tests-restructured/report-service && npx codeceptjs run --steps",
+    "test:chat": "cd tests-restructured/chat-service && npx codeceptjs run --steps",
+    "test:staff": "cd tests-restructured/staff-service && npx codeceptjs run --steps",
+    "test:frontend": "cd tests-restructured/frontend && npx codeceptjs run --steps",
+    "test:all": "bash scripts/run-all-tests.sh"
   },
   "devDependencies": {
-    "codeceptjs": "^3.6.0",
     "@codeceptjs/configure": "^0.10.0",
+    "@types/node": "^25.6.0",
+    "codeceptjs": "^3.7.8",
     "dotenv": "^16.0.0",
-    "ts-node": "^10.9.0",
-    "typescript": "^5.0.0"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

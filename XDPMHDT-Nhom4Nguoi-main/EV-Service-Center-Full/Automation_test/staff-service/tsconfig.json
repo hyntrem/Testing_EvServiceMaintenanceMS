@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "types": ["node", "codeceptjs"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": false,
+    "skipLibCheck": true
+  },
+  "include": ["./**/*.ts", "steps_file.js"],
+  "exclude": ["node_modules", "output"]
+  
+}

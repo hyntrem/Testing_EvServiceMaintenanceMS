@@ -1,39 +1,34 @@
-import { setHeadlessWhen, setCommonPlugins } from '@codeceptjs/configure';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: __dirname + '/.env' });
 
-setHeadlessWhen(process.env.HEADLESS === 'true');
+import { setHeadlessWhen } from '@codeceptjs/configure';
+import dotenv from 'dotenv';
 
-export const config: CodeceptJS.MainConfig = {
+require('dotenv').config();
+
+exports.config = {
   name: 'staff-service',
-  tests: './tests/**/*_test.js',
+
+  tests: './tests/**/*.js',
   output: './output',
 
-  helpers: {
-    REST: {
-      endpoint: process.env.BASE_URL || 'http://localhost:8008',
-      defaultHeaders: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    },
-    BaseHelper: {
-      require: '../../_shared/helpers/BaseHelper.js',
+ helpers: {
+  REST: {
+    endpoint: process.env.BASE_URL,
+    defaultHeaders: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
   },
+},
 
   include: {
-    I: './steps_file.ts',
+    I: './steps_file.js',
+    auth: './helpers/auth.js',
   },
 
   plugins: {
     retryFailedStep: {
       enabled: true,
       retries: 2,
-    },
-    screenshotOnFail: {
-      enabled: true,
-      path: './output/screenshots',
     },
   },
 };
