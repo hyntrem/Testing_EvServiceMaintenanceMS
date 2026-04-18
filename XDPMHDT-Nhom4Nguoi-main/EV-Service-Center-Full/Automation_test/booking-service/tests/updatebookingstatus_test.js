@@ -9,14 +9,19 @@ function formatLocalDateTime(date) {
   )}`;
 }
 
-function generateFutureSlot(offsetMinutes = 120) {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() + offsetMinutes);
-  now.setSeconds(0);
-  now.setMilliseconds(0);
+function generateFutureSlot(seedMinutes = 0, attempt = 0) {
+  const start = new Date(
+    Date.now() +
+      (4 * 24 * 60 +
+        seedMinutes +
+        attempt * 181 +
+        Math.floor(Math.random() * 43)) *
+        60 *
+        1000,
+  );
+  start.setMilliseconds(0);
 
-  const start = new Date(now);
-  const end = new Date(now);
+  const end = new Date(start);
   end.setHours(end.getHours() + 1);
 
   return {
@@ -25,46 +30,55 @@ function generateFutureSlot(offsetMinutes = 120) {
   };
 }
 
-async function createBooking(I, offsetMinutes = 120) {
-  const { start_time, end_time } = generateFutureSlot(offsetMinutes);
-
+async function createBooking(I, baseOffset = 3000, maxRetries = 12) {
   I.haveRequestHeaders({
     Authorization: `Bearer ${process.env.API_TOKEN}`,
     "Content-Type": "application/json",
     Accept: "application/json",
   });
 
-  const createRes = await I.sendPostRequest("/api/bookings/items", {
-    service_type: "Battery Maintenance",
-    technician_id: Math.floor(Math.random() * 3) + 1,
-    station_id: Math.floor(Math.random() * 3) + 1,
-    start_time,
-    end_time,
-  });
+  for (let i = 0; i < maxRetries; i++) {
+    const { start_time, end_time } = generateFutureSlot(baseOffset, i);
+    const technician_id = (i % 2) + 1;
+    const station_id = ((i + 1) % 2) + 1;
 
-  console.log("create status:", createRes.status);
-  console.log("create body:", createRes.data);
+    const createRes = await I.sendPostRequest("/api/bookings/items", {
+      service_type: "Battery Maintenance",
+      technician_id,
+      station_id,
+      start_time,
+      end_time,
+    });
 
-  if (![200, 201].includes(createRes.status)) {
-    throw new Error(`Create booking setup failed, got ${createRes.status}`);
+    console.log(`create retry ${i + 1} status:`, createRes.status);
+    console.log(`create retry ${i + 1} body:`, createRes.data);
+
+    if ([200, 201].includes(createRes.status)) {
+      const bookingId =
+        createRes.data?.id ||
+        createRes.data?.booking_id ||
+        createRes.data?.booking?.id ||
+        createRes.data?.booking?.booking_id;
+
+      if (!bookingId) {
+        throw new Error("Create booking setup did not return booking id");
+      }
+
+      return bookingId;
+    }
+
+    if (createRes.status !== 409) {
+      throw new Error(`Create booking setup failed, got ${createRes.status}`);
+    }
   }
 
-  const bookingId =
-    createRes.data?.id ||
-    createRes.data?.booking_id ||
-    createRes.data?.booking?.id ||
-    createRes.data?.booking?.booking_id;
-
-  if (!bookingId) {
-    throw new Error("Create booking setup did not return booking id");
-  }
-
-  return bookingId;
+  throw new Error(
+    "Create booking setup failed after retries because of 409 conflict",
+  );
 }
 
 Scenario("Update booking status - success", async ({ I }) => {
-  const randomOffset = Math.floor(Math.random() * 300) + 120;
-  const bookingId = await createBooking(I, randomOffset);
+  const bookingId = await createBooking(I, 3000, 12);
 
   I.haveRequestHeaders({
     Authorization: `Bearer ${process.env.ADMIN_TOKEN}`,
@@ -94,8 +108,7 @@ Scenario("Update booking status - success", async ({ I }) => {
 });
 
 Scenario("Update booking status - invalid status", async ({ I }) => {
-  const randomOffset = Math.floor(Math.random() * 300) + 500;
-  const bookingId = await createBooking(I, randomOffset);
+  const bookingId = await createBooking(I, 4200, 12);
 
   I.haveRequestHeaders({
     Authorization: `Bearer ${process.env.ADMIN_TOKEN}`,
@@ -138,8 +151,7 @@ Scenario("Update booking status - not found", async ({ I }) => {
 });
 
 Scenario("Update booking status - no token", async ({ I }) => {
-  const randomOffset = Math.floor(Math.random() * 300) + 800;
-  const bookingId = await createBooking(I, randomOffset);
+  const bookingId = await createBooking(I, 5400, 12);
 
   I.haveRequestHeaders({
     Authorization: "",

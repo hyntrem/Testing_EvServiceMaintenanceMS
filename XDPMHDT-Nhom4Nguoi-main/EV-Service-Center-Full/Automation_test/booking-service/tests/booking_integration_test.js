@@ -2,67 +2,81 @@ Feature("booking integration");
 
 let bookingId;
 
-function generateBookingTime() {
-  const now = new Date();
+function formatLocalDateTime(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+    date.getSeconds(),
+  )}`;
+}
 
-  // tăng ngẫu nhiên để tránh trùng slot cũ
-  const randomOffset = Math.floor(Math.random() * 300) + 120;
-  now.setMinutes(now.getMinutes() + randomOffset);
-  now.setSeconds(0);
-  now.setMilliseconds(0);
+function generateFutureSlot(seedMinutes = 0, attempt = 0) {
+  const start = new Date(
+    Date.now() +
+      (5 * 24 * 60 +
+        seedMinutes +
+        attempt * 181 +
+        Math.floor(Math.random() * 43)) *
+        60 *
+        1000,
+  );
+  start.setMilliseconds(0);
 
-  const start = new Date(now);
-  const end = new Date(now);
+  const end = new Date(start);
   end.setHours(end.getHours() + 1);
 
-  const pad = (n) => String(n).padStart(2, "0");
-
-  const formatLocal = (d) => {
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-      d.getDate(),
-    )}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  };
-
   return {
-    start_time: formatLocal(start),
-    end_time: formatLocal(end),
+    start_time: formatLocalDateTime(start),
+    end_time: formatLocalDateTime(end),
   };
 }
 
-Scenario("Full booking flow", async ({ I }) => {
-  const { start_time, end_time } = generateBookingTime();
-
-  console.log("start_time:", start_time);
-  console.log("end_time:", end_time);
-
-  // random nhẹ để tránh conflict
-  const technician_id = Math.floor(Math.random() * 3) + 1;
-  const station_id = Math.floor(Math.random() * 3) + 1;
-
-  console.log("technician_id:", technician_id);
-  console.log("station_id:", station_id);
-
-  // 1. CREATE BOOKING (USER)
+async function createBookingWithRetry(I, baseOffset = 5000, maxRetries = 12) {
   I.haveRequestHeaders({
     Authorization: `Bearer ${process.env.API_TOKEN}`,
     "Content-Type": "application/json",
     Accept: "application/json",
   });
 
-  const createRes = await I.sendPostRequest("/api/bookings/items", {
-    service_type: "Battery Maintenance",
-    technician_id,
-    station_id,
-    start_time,
-    end_time,
-  });
+  for (let i = 0; i < maxRetries; i++) {
+    const { start_time, end_time } = generateFutureSlot(baseOffset, i);
+    const technician_id = (i % 2) + 1;
+    const station_id = ((i + 1) % 2) + 1;
 
-  console.log("CREATE status:", createRes.status);
-  console.log("CREATE body:", createRes.data);
+    console.log(`retry ${i + 1} start_time:`, start_time);
+    console.log(`retry ${i + 1} end_time:`, end_time);
+    console.log(`retry ${i + 1} technician_id:`, technician_id);
+    console.log(`retry ${i + 1} station_id:`, station_id);
 
-  if (![200, 201].includes(createRes.status)) {
-    throw new Error(`Create booking failed. Status: ${createRes.status}`);
+    const createRes = await I.sendPostRequest("/api/bookings/items", {
+      service_type: "Battery Maintenance",
+      technician_id,
+      station_id,
+      start_time,
+      end_time,
+    });
+
+    console.log(`CREATE retry ${i + 1} status:`, createRes.status);
+    console.log(`CREATE retry ${i + 1} body:`, createRes.data);
+
+    if ([200, 201].includes(createRes.status)) {
+      return { createRes, start_time, end_time, technician_id, station_id };
+    }
+
+    if (createRes.status !== 409) {
+      throw new Error(`Create booking failed. Status: ${createRes.status}`);
+    }
   }
+
+  throw new Error(
+    "Create booking failed after retries because of 409 conflict",
+  );
+}
+
+Scenario("Full booking flow", async ({ I }) => {
+  // 1. CREATE BOOKING (USER)
+  const { createRes } = await createBookingWithRetry(I, 5000, 12);
 
   bookingId =
     createRes.data?.id ||

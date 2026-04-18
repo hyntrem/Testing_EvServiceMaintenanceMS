@@ -25,9 +25,9 @@ function generateFutureSlot(offsetMinutes = 120) {
   };
 }
 
-async function createBooking(I, baseOffset = 120, maxRetries = 5) {
+async function createBooking(I, baseOffset = 1200, maxRetries = 10) {
   for (let i = 0; i < maxRetries; i++) {
-    const offset = baseOffset + i * 41 + Math.floor(Math.random() * 13);
+    const offset = baseOffset + i * 73 + Math.floor(Math.random() * 31);
     const { start_time, end_time } = generateFutureSlot(offset);
 
     I.haveRequestHeaders({
@@ -38,14 +38,14 @@ async function createBooking(I, baseOffset = 120, maxRetries = 5) {
 
     const createRes = await I.sendPostRequest("/api/bookings/items", {
       service_type: "Battery Maintenance",
-      technician_id: Math.floor(Math.random() * 2) + 1,
-      station_id: Math.floor(Math.random() * 2) + 1,
+      technician_id: Math.floor(Math.random() * 3) + 1,
+      station_id: Math.floor(Math.random() * 3) + 1,
       start_time,
       end_time,
     });
 
-    console.log("create status:", createRes.status);
-    console.log("create body:", createRes.data);
+    console.log(`create retry ${i + 1} status:`, createRes.status);
+    console.log(`create retry ${i + 1} body:`, createRes.data);
 
     if ([200, 201].includes(createRes.status)) {
       const bookingId =
@@ -72,7 +72,7 @@ async function createBooking(I, baseOffset = 120, maxRetries = 5) {
 }
 
 Scenario("Delete booking - success", async ({ I }) => {
-  const bookingId = await createBooking(I, 120);
+  const bookingId = await createBooking(I, 1500, 10);
 
   I.haveRequestHeaders({
     Authorization: `Bearer ${process.env.ADMIN_TOKEN}`,
@@ -110,7 +110,7 @@ Scenario("Delete booking - not found", async ({ I }) => {
 });
 
 Scenario("Delete booking - no token", async ({ I }) => {
-  const bookingId = await createBooking(I, 500);
+  const bookingId = await createBooking(I, 1900, 10);
 
   I.haveRequestHeaders({
     Authorization: "",
@@ -131,7 +131,7 @@ Scenario("Delete booking - no token", async ({ I }) => {
 });
 
 Scenario("Delete booking - invalid token", async ({ I }) => {
-  const bookingId = await createBooking(I, 800);
+  const bookingId = await createBooking(I, 2300, 10);
 
   I.haveRequestHeaders({
     Authorization: "Bearer invalid_token",

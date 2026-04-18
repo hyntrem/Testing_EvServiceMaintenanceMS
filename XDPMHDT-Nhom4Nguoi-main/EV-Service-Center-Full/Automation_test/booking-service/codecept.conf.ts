@@ -1,10 +1,9 @@
-import { setHeadlessWhen, setCommonPlugins } from "@codeceptjs/configure";
+import { setHeadlessWhen } from "@codeceptjs/configure";
 import * as dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ path: "./booking-service/.env" });
 
 setHeadlessWhen(process.env.HEADLESS === "true");
-setCommonPlugins();
 
 export const config = {
   name: "booking-service",
@@ -18,24 +17,18 @@ export const config = {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-    },
-    BaseHelper: {
-      require: "../_shared/helpers/BaseHelper.js",
+      timeout: 10000,
     },
   },
 
   include: {
-    I: "./steps_file.ts",
+    I: "./steps_file.js",
   },
 
   plugins: {
     retryFailedStep: {
       enabled: true,
       retries: 2,
-    },
-    screenshotOnFail: {
-      enabled: true,
-      path: "./output/screenshots",
     },
   },
 };

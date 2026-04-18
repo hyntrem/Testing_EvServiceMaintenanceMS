@@ -9,14 +9,19 @@ function formatLocalDateTime(date) {
   )}`;
 }
 
-function generateFutureSlot(offsetMinutes = 120) {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() + offsetMinutes);
-  now.setSeconds(0);
-  now.setMilliseconds(0);
+function generateFutureSlot(seedMinutes = 0, attempt = 0) {
+  const start = new Date(
+    Date.now() +
+      (3 * 24 * 60 +
+        seedMinutes +
+        attempt * 181 +
+        Math.floor(Math.random() * 43)) *
+        60 *
+        1000,
+  );
+  start.setMilliseconds(0);
 
-  const start = new Date(now);
-  const end = new Date(now);
+  const end = new Date(start);
   end.setHours(end.getHours() + 1);
 
   return {
@@ -41,15 +46,22 @@ function generatePastSlot() {
   };
 }
 
-async function createBookingWithRetry(I, baseOffset = 120, maxRetries = 5) {
+async function createBookingWithRetry(I, baseOffset = 0, maxRetries = 12) {
+  I.haveRequestHeaders({
+    Authorization: `Bearer ${process.env.API_TOKEN}`,
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  });
+
   for (let i = 0; i < maxRetries; i++) {
-    const offset = baseOffset + i * 37 + Math.floor(Math.random() * 17);
-    const { start_time, end_time } = generateFutureSlot(offset);
+    const { start_time, end_time } = generateFutureSlot(baseOffset, i);
+    const technician_id = (i % 2) + 1;
+    const station_id = ((i + 1) % 2) + 1;
 
     const res = await I.sendPostRequest("/api/bookings/items", {
       service_type: "Battery Maintenance",
-      technician_id: Math.floor(Math.random() * 2) + 1,
-      station_id: Math.floor(Math.random() * 2) + 1,
+      technician_id,
+      station_id,
       start_time,
       end_time,
     });
@@ -58,7 +70,7 @@ async function createBookingWithRetry(I, baseOffset = 120, maxRetries = 5) {
     console.log(`retry ${i + 1} body:`, res.data);
 
     if ([200, 201].includes(res.status)) {
-      return { res, start_time, end_time };
+      return { res, start_time, end_time, technician_id, station_id };
     }
 
     if (res.status !== 409) {
@@ -72,11 +84,7 @@ async function createBookingWithRetry(I, baseOffset = 120, maxRetries = 5) {
 }
 
 Scenario("Create booking - success", async ({ I }) => {
-  I.haveRequestHeaders({
-    Authorization: `Bearer ${process.env.API_TOKEN}`,
-  });
-
-  const { res } = await createBookingWithRetry(I, 125);
+  const { res } = await createBookingWithRetry(I, 1000);
 
   console.log("success status:", res.status);
   console.log("success body:", res.data);
@@ -87,7 +95,7 @@ Scenario("Create booking - success", async ({ I }) => {
 });
 
 Scenario("Create booking - missing field", async ({ I }) => {
-  const { start_time, end_time } = generateFutureSlot(185);
+  const { start_time, end_time } = generateFutureSlot(185, 0);
 
   I.haveRequestHeaders({
     Authorization: `Bearer ${process.env.API_TOKEN}`,
@@ -135,16 +143,17 @@ Scenario(
 );
 
 Scenario("Create booking - conflict", async ({ I }) => {
+  const { start_time, end_time, technician_id, station_id } =
+    await createBookingWithRetry(I, 2000);
+
   I.haveRequestHeaders({
     Authorization: `Bearer ${process.env.API_TOKEN}`,
   });
 
-  const { start_time, end_time } = await createBookingWithRetry(I, 245);
-
   const res = await I.sendPostRequest("/api/bookings/items", {
     service_type: "Battery Maintenance",
-    technician_id: 2,
-    station_id: 2,
+    technician_id,
+    station_id,
     start_time,
     end_time,
   });
@@ -181,4 +190,3 @@ Scenario("Create booking - past time (BVA - BUG EXPECTED)", async ({ I }) => {
     );
   }
 });
-// test

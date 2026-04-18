@@ -1,10 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "strict": false,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "codeceptjs"]
   }
 }
