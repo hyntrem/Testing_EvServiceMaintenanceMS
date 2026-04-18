@@ -4,21 +4,33 @@ dotenv.config({ path: __dirname + '/.env' });
 
 setHeadlessWhen(process.env.HEADLESS === 'true');
 
-export const config: CodeceptJS.MainConfig = {
+export const config = {
   name: 'payment-service',
   tests: './tests/**/*_test.js',
   output: './output',
 
+reporter: 'mochawesome',
+
+  mocha: {
+    reporterOptions: {
+      reportDir: 'output',        // Ép báo cáo xuất vào thư mục output
+      reportFilename: 'payment_report', // Đặt tên file báo cáo
+      overwrite: true,
+      html: true,
+      json: true
+    }
+  },
+
   helpers: {
     REST: {
-      endpoint: process.env.BASE_URL || 'http://localhost:8004',
+      endpoint: process.env.BASE_URL || 'http://localhost',
       defaultHeaders: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
     },
     BaseHelper: {
-      require: '../../_shared/helpers/BaseHelper.js',
+      require: '../_shared/helpers/BaseHelper.js',
     },
   },
 
