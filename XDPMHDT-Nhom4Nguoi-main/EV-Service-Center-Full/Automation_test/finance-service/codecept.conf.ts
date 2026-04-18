@@ -1,10 +1,10 @@
-import { setHeadlessWhen, setCommonPlugins } from '@codeceptjs/configure';
+import { setHeadlessWhen } from '@codeceptjs/configure';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: __dirname + '/.env' });
 
 setHeadlessWhen(process.env.HEADLESS === 'true');
 
-export const config: CodeceptJS.MainConfig = {
+export const config = {
   name: 'finance-service',
   tests: './tests/**/*_test.js',
   output: './output',
@@ -18,13 +18,23 @@ export const config: CodeceptJS.MainConfig = {
       },
     },
     BaseHelper: {
-      require: '../../_shared/helpers/BaseHelper.js',
+      require: '../_shared/helpers/BaseHelper.js',
     },
   },
 
-  include: {
-    I: './steps_file.ts',
+  mocha: {
+    reporterOptions: {
+      reportDir: './output',
+      reportFilename: 'finance_report',
+      overwrite: true,
+      html: true,
+      json: true
+    }
   },
+  // include: {
+  //   I: './steps_file.ts',
+  // },
+
 
   plugins: {
     retryFailedStep: {
