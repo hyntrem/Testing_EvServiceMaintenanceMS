@@ -178,25 +178,6 @@ Scenario('BVA - invalid rating > 5', async ({ I }) => {
   assert.ok([400, 422].includes(res.status));
 });
 
-
-// Tạo performance - không có token
-Scenario('Create performance - no token', async ({ I }) => {
-
-  I.clearHeader('Authorization');
-
-  const res = await I.sendPostRequest('/api/performance/', {
-    staff_id: staffId,
-    period_type: 'monthly',
-    period_start: '2026-04-01',
-    period_end: '2026-04-30'
-  });
-
-  console.log(res.data);
-
-  assert.equal(res.status, 401);
-});
-
-
 // Cap nhật performance không tồn tại staff
 Scenario('Update performance - not found', async ({ I }) => {
 

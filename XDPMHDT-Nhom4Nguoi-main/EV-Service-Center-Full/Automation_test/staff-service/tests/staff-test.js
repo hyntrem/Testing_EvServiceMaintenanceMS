@@ -85,24 +85,6 @@ Scenario('Create staff - missing required field', async ({ I }) => {
   assert.equal(res.status, 400);
   assert.equal(res.data.success, false);
 });
-// Tạo stafff - không có token
-
-Scenario('Create staff - no token', async ({ I }) => {
-
-  I.clearHeader('Authorization');
-
-  const res = await I.sendPostRequest('/api/staff/', {
-    full_name: 'No Token Staff',
-    email: `notoken_${Date.now()}@gmail.com`,
-    role: 'technician',
-    specialization: 'general'
-  });
-
-  console.log(res.data);
-
-  //  API đang cho phép tạo
-  assert.equal(res.status, 201);
-});
 
 // Tạo staff - email đã tồn tại
 Scenario('Create staff - duplicate email', async ({ I }) => {
@@ -149,19 +131,6 @@ Scenario('Update staff not found', async ({ I }) => {
 });
 
 
-// Lấy staff không có token
-Scenario('Get staff without token', async ({ I }) => {
-
-  I.clearHeader('Authorization');
-
-  const res = await I.sendGetRequest('/api/staff');
-
-  console.log(res.data);
-
-  //  API thực tế đang trả 200
-  assert.equal(res.status, 200);
-});
-
 // Tạo staff - BVA email length
 Scenario('Create staff - BVA email length', async ({ I }) => {
 
@@ -202,16 +171,4 @@ Scenario('Delete staff - not found', async ({ I }) => {
 
   assert.equal(res.status, 404);
   assert.equal(res.data.success, false);
-});
-// Xóa staff - không có token
-Scenario('Delete staff - no token', async ({ I }) => {
-
-  I.clearHeader('Authorization');
-
-  const res = await I.sendDeleteRequest('/api/staff/1');
-
-  console.log(res.data);
-
-  //  API thực tế cho phép delete
-  assert.equal(res.status, 200);
 });

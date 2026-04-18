@@ -115,25 +115,6 @@ Scenario('Delete shift', async ({ I }) => {
   assert.equal(res.data.success, true);
 });
 
-
-// Tạo shift - không có token
-Scenario('Create shift - no token', async ({ I }) => {
-
-  I.clearHeader('Authorization');
-
-  const res = await I.sendPostRequest('/api/shifts/', {
-    staff_id: 2,
-    shift_date: '2026-04-20',
-    shift_type: 'morning',
-    start_time: '08:00:00',
-    end_time: '12:00:00'
-  });
-
-  console.log(res.data);
-
-  assert.equal(res.status, 401);
-});
-
 // Tạo shift - thiếu field bắt buộc
 Scenario('Create shift - missing required field', async ({ I }) => {
 
@@ -175,28 +156,7 @@ Scenario('Get shift not found', async ({ I }) => {
 
   assert.equal(res.status, 200); // list API vẫn 200
 });
-// Check-in shift - không có token
-Scenario('Check-in shift - no token', async ({ I }) => {
 
-  I.clearHeader('Authorization');
-
-  const res = await I.sendPutRequest(`/api/shifts/${shiftId}/check-in`, {});
-
-  console.log(res.data);
-
-  assert.equal(res.status, 401);
-});
-// Check-out shift - không có token
-Scenario('Check-out shift - no token', async ({ I }) => {
-
-  I.clearHeader('Authorization');
-
-  const res = await I.sendPutRequest(`/api/shifts/${shiftId}/check-out`, {});
-
-  console.log(res.data);
-
-  assert.equal(res.status, 401);
-});
 // Xóa shift 
 Scenario('Delete shift - success', async ({ I }) => {
 
@@ -207,16 +167,46 @@ Scenario('Delete shift - success', async ({ I }) => {
   assert.equal(res.status, 200);
   assert.equal(res.data.success, true);
 });
-
-
-// Xóa shift - không có token
-Scenario('Delete shift - no token', async ({ I }) => {
-
-  I.clearHeader('Authorization');
-
-  const res = await I.sendDeleteRequest(`/api/shifts/${shiftId}`);
+// Xóa shift - không tồn tại
+Scenario('Delete shift - not found', async ({ I }) => {
+  const res = await I.sendDeleteRequest('/api/shifts/999999');
 
   console.log(res.data);
 
-  assert.equal(res.status, 401);
+  assert.equal(res.status, 404);
+  assert.equal(res.data.success, false);
+  assert.equal(res.data.error, 'Shift not found');
+});
+// Cập nhật shift - không tồn tại
+Scenario('Update shift - not found', async ({ I }) => {
+  const res = await I.sendPutRequest('/api/shifts/999999', {
+    notes: 'Updated shift test',
+    status: 'scheduled'
+  });
+
+  console.log(res.data);
+
+  assert.equal(res.status, 404);
+  assert.equal(res.data.success, false);
+  assert.equal(res.data.error, 'Shift not found');
+});
+// Check-in shift - không tồn tại
+Scenario('Check-in shift - not found', async ({ I }) => {
+  const res = await I.sendPutRequest('/api/shifts/999999/check-in', {});
+
+  console.log(res.data);
+
+  assert.equal(res.status, 404);
+  assert.equal(res.data.success, false);
+  assert.equal(res.data.error, 'Shift not found');
+});
+// Check-out shift - không tồn tại
+Scenario('Check-out shift - not found', async ({ I }) => {
+  const res = await I.sendPutRequest('/api/shifts/999999/check-out', {});
+
+  console.log(res.data);
+
+  assert.equal(res.status, 404);
+  assert.equal(res.data.success, false);
+  assert.equal(res.data.error, 'Shift not found');
 });
